@@ -1,0 +1,36 @@
+{
+  "tenants": {
+    "tnt_default": {
+      "clients": [
+        {
+          "id": "cli_6f0172c3-7070-48b9-a0d4-dc6df0ea2089",
+          "tenantId": "tnt_default",
+          "name": "dfaf",
+          "config": {
+            "version": "1.0",
+            "templateId": "production-control",
+            "dataMapping": {},
+            "dashboard": {
+              "layout": "grid",
+              "metricIds": [
+                "Overall Equipment Effectiveness (OEE)",
+                "Production Volume",
+                "Scrap Rate"
+              ]
+            },
+            "permissions": {
+              "admins": [],
+              "editors": [],
+              "viewers": []
+            },
+            "metadata": {
+              "spreadsheetId": "asdasd"
+            }
+          },
+          "createdAt": "2026-01-23T08:58:19.286Z"
+        }
+      ],
+      "events": []
+    }
+  }
+}

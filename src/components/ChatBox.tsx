@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles } from 'lucide-react';
 
-export default function ChatBox({ clientId }: { clientId: string }) {
+export default function ChatBox({ clientId, tenantId }: { clientId: string, tenantId: string }) {
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([
     { role: 'assistant', content: 'Hello. I can explain the metrics on this dashboard. What would you like to know?' }
   ]);
@@ -31,7 +31,8 @@ export default function ChatBox({ clientId }: { clientId: string }) {
         method: 'POST',
         body: JSON.stringify({
           messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
-          clientId
+          clientId,
+          tenantId
         })
       });
       const data = await res.json();

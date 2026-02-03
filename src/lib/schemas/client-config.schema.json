@@ -1,0 +1,65 @@
+{
+  "configVersion": "client-config.v1",
+  "tenantId": "tnt_123",
+  "clientId": "cli_456",
+  "dataSources": [
+    {
+      "sourceId": "src_1",
+      "type": "google_sheets",
+      "spreadsheetId": "1AbC...",
+      "sheets": [
+        {
+          "sheetName": "Sales",
+          "range": "A1:Z999",
+          "eventType": "invoice_paid",
+          "columnMapping": {
+            "time.occurredAt": "A",
+            "entity.id": "B",
+            "entity.name": "C",
+            "measures.amount": "D",
+            "dimensions.currency": "E"
+          },
+          "qualityRules": [
+            { "field": "time.occurredAt", "rule": "not_empty" },
+            { "field": "measures.amount", "rule": "is_positive_number" }
+          ]
+        },
+        {
+          "sheetName": "Expenses",
+          "range": "A1:F100",
+          "eventType": "expense_recorded",
+          "columnMapping": {
+            "time.occurredAt": "A",
+            "measures.amount": "B",
+            "dimensions.cost_type": "C"
+          }
+        }
+      ]
+    }
+  ],
+  "dashboardConfig": {
+    "templateId": "executive-kpi-saas",
+    "layout": {
+      "version": "layout.v1",
+      "kpis": [
+        { "metricId": "fin.total_revenue", "position": 1 },
+        { "metricId": "fin.net_profit", "position": 2 },
+        { "metricId": "saas.mrr", "position": 3 },
+        { "metricId": "saas.churn_rate_pct", "position": 4 }
+      ],
+      "charts": [
+        { "chartId": "chart_revenue_trend", "metricId": "fin.total_revenue", "type": "line", "groupBy": "month" }
+      ]
+    },
+    "thresholds": [
+      { "metricId": "saas.churn_rate_pct", "warning_above": 5, "error_above": 8 }
+    ]
+  },
+  "permissions": {
+    "version": "perms.v1",
+    "roles": [
+      { "role": "admin", "userIds": ["user_001"] },
+      { "role": "viewer", "userIds": ["user_002", "user_003"] }
+    ]
+  }
+}

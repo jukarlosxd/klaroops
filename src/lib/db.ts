@@ -1,77 +1,121 @@
-// Mock DB for Vercel Deployment
-// better-sqlite3 does not work in Vercel Serverless environment (ephemeral FS + build issues).
-// Switching to In-Memory DB for MVP/Demo purposes.
+import fs from 'fs';
+import path from 'path';
+import { Client, ClientConfig, Event } from '@/types/client';
 
-export interface Client {
-  id: string;
-  name: string;
-  template_id: string;
-  spreadsheet_id: string;
-  last_sync: string | null;
+// Import schemas to be used as types (a more advanced setup would generate types from JSON schemas)
+import eventSchema from './schemas/event.schema.json';
+import clientConfigSchema from './schemas/client-config.schema.json';
+
+// The main database structure, organized by tenant
+interface DbData {
+  tenants: {
+    [tenantId: string]: {
+      clients: Client[];
+      events: Event[];
+    };
+  };
 }
 
-export interface RawEvent {
-  id: number;
-  client_id: string;
-  timestamp: string;
-  location: string;
-  area: string;
-  asset_id: string;
-  status: string;
-  note: string;
-  raw_data: string;
+const dbPath = path.resolve(process.cwd(), 'src', 'lib', 'db.json');
+
+// --- DB Access Functions ---
+
+function readDb(): DbData {
+  try {
+    if (fs.existsSync(dbPath)) {
+      const data = fs.readFileSync(dbPath, 'utf-8');
+      return JSON.parse(data);
+    }
+  }
+  catch (error) {
+    console.error("Error reading or parsing db.json:", error);
+  }
+  // If file doesn't exist or is corrupt, return a default structure
+  return { tenants: {} };
 }
 
-// Global cache to survive some reloads in dev, but will reset in serverless
-declare global {
-  var _mockDb: {
-    clients: Client[];
-    events: RawEvent[];
-  } | undefined;
+function writeDb(data: DbData) {
+  fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
 }
 
-const db = global._mockDb || {
-  clients: [],
-  events: []
+// --- Tenant and Client Functions ---
+
+/**
+ * Retrieves all clients for a given tenant.
+ * NOTE: In a real multi-tenant app, you would get the tenantId from the user's session.
+ */
+export const getClientsForTenant = (tenantId: string): Client[] => {
+  const db = readDb();
+  return db.tenants[tenantId]?.clients || [];
 };
 
-if (process.env.NODE_ENV !== 'production') {
-  global._mockDb = db;
-}
-
-export const getClients = (): Client[] => {
-  return db.clients;
+/**
+ * Retrieves a single client by its ID, ensuring it belongs to the correct tenant.
+ */
+export const getClient = (tenantId: string, clientId: string): Client | undefined => {
+  const clients = getClientsForTenant(tenantId);
+  return clients.find(c => c.id === clientId);
 };
 
-export const getClient = (id: string): Client | undefined => {
-  return db.clients.find(c => c.id === id);
+/**
+ * Creates a new client within a tenant.
+ */
+export const createClient = (tenantId: string, name: string, config: ClientConfig): Client => {
+  const db = readDb();
+  if (!db.tenants[tenantId]) {
+    db.tenants[tenantId] = { clients: [], events: [] };
+  }
+
+  const newClient: Client = {
+    id: `cli_${crypto.randomUUID()}`,
+    tenantId,
+    name,
+    config,
+    createdAt: new Date().toISOString(),
+  };
+
+  db.tenants[tenantId].clients.push(newClient);
+  writeDb(db);
+  return newClient;
 };
 
-export const createClient = (client: Client) => {
-  db.clients.push(client);
+// --- Event Functions ---
+
+/**
+ * Inserts a batch of standardized events for a specific client.
+ */
+export const insertEvents = (tenantId: string, events: Event[]) => {
+  const db = readDb();
+  if (!db.tenants[tenantId]) {
+    // This should not happen if a client exists, but as a safeguard:
+    db.tenants[tenantId] = { clients: [], events: [] };
+  }
+  db.tenants[tenantId].events.push(...events);
+  writeDb(db);
 };
 
-export const updateClientSync = (id: string, timestamp: string) => {
-  const client = db.clients.find(c => c.id === id);
-  if (client) client.last_sync = timestamp;
+/**
+ * Retrieves all events for a given client, sorted by time.
+ */
+export const getClientEvents = (tenantId: string, clientId: string): Event[] => {
+  const db = readDb();
+  const tenantEvents = db.tenants[tenantId]?.events || [];
+  
+  // Filter events that belong to the specific client
+  return tenantEvents
+    .filter(e => e.clientId === clientId)
+    .sort((a, b) => new Date(b.time.occurredAt).getTime() - new Date(a.time.occurredAt).getTime());
 };
 
-export const clearClientEvents = (clientId: string) => {
-  db.events = db.events.filter(e => e.client_id !== clientId);
+/**
+ * Clears all events for a specific client. Useful for re-syncs.
+ */
+export const clearClientEvents = (tenantId: string, clientId: string) => {
+  const db = readDb();
+  if (db.tenants[tenantId]) {
+    const originalCount = db.tenants[tenantId].events.length;
+    db.tenants[tenantId].events = db.tenants[tenantId].events.filter(e => e.clientId !== clientId);
+    console.log(`Cleared ${originalCount - db.tenants[tenantId].events.length} events for client ${clientId}`);
+    writeDb(db);
+  }
 };
-
-export const insertEvents = (events: Omit<RawEvent, 'id'>[]) => {
-  let lastId = db.events.length > 0 ? Math.max(...db.events.map(e => e.id)) : 0;
-  events.forEach(e => {
-    lastId++;
-    db.events.push({ ...e, id: lastId });
-  });
-};
-
-export const getClientEvents = (clientId: string): RawEvent[] => {
-  return db.events
-    .filter(e => e.client_id === clientId)
-    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-};
-
-export default db;

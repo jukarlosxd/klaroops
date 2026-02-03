@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "event.v1",
+  "eventId": "evt_01J...ULID",
+  "tenantId": "tnt_123",
+  "clientId": "cli_456",
+  "source": {
+    "type": "google_sheets",
+    "spreadsheetId": "1AbC...",
+    "sheetName": "Sales",
+    "range": "A1:Z999",
+    "rowId": "row_128",
+    "ingestedAt": "2026-01-23T18:20:00Z"
+  },
+  "time": {
+    "occurredAt": "2026-01-01T00:00:00Z",
+    "timezone": "America/Denver"
+  },
+  "eventType": "invoice_paid",
+  "entity": {
+    "type": "customer",
+    "id": "cus_001",
+    "name": "ACME Inc"
+  },
+  "dimensions": {
+    "currency": "USD",
+    "country": "US",
+    "channel": "referral",
+    "plan": "pro",
+    "product": "klaroopa"
+  },
+  "measures": {
+    "amount": 129.0,
+    "tax": 0.0,
+    "cost": 0.0,
+    "quantity": 1
+  },
+  "links": {
+    "invoiceId": "inv_1001",
+    "subscriptionId": "sub_9001",
+    "paymentId": "pay_777"
+  },
+  "quality": {
+    "status": "ok",
+    "warnings": [],
+    "errors": []
+  }
+}

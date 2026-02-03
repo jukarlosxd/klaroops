@@ -1,0 +1,31 @@
+import React from 'react';
+import { getAmbassadors, getClients, getCommissions } from '@/lib/admin-db';
+import AmbassadorsClient from './client';
+
+export const dynamic = 'force-dynamic';
+
+export default async function AmbassadorsPage() {
+  const ambassadors = (await getAmbassadors()) || [];
+  const allClients = (await getClients()) || [];
+  const allCommissions = (await getCommissions()) || [];
+
+  // Calculate KPIs per ambassador
+  const enrichedAmbassadors = ambassadors.map(amb => {
+    const clients = Array.isArray(allClients) ? allClients.filter(c => c.ambassador_id === amb.id) : [];
+    const activeClients = clients.filter(c => c.status === 'active').length;
+    
+    const commissions = Array.isArray(allCommissions) ? allCommissions.filter(c => c.ambassador_id === amb.id) : [];
+    const pendingCommissionCents = commissions
+      .filter(c => c.status === 'pending')
+      .reduce((sum, c) => sum + c.amount_cents, 0);
+
+    return {
+      ...amb,
+      activeClients,
+      totalClients: clients.length,
+      pendingCommission: pendingCommissionCents / 100 // Convert to dollars/units
+    };
+  });
+
+  return <AmbassadorsClient ambassadors={enrichedAmbassadors} />;
+}

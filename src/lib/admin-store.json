@@ -1,0 +1,435 @@
+{
+  "ambassadors": [
+    {
+      "id": "e33f8cc3-bda9-4192-b69f-d4b4a5b7ea27",
+      "user_id": "3130f933-458b-4d97-b5ca-760effdf5121",
+      "name": "agsgt",
+      "status": "active",
+      "commission_rule_json": "{\"rate\": 0.10}",
+      "created_at": "2026-02-03T09:18:39.229Z"
+    }
+  ],
+  "clients": [
+    {
+      "id": "8fc33168-1a78-4371-9a62-b472946ebb6f",
+      "name": "nigga",
+      "legal_name": "asdads",
+      "industry": "manufacturing",
+      "notes_internal": "niugga",
+      "status": "active",
+      "ambassador_id": null,
+      "contract_value_cents": 1231400,
+      "contract_currency": "USD",
+      "contract_type": "monthly",
+      "contract_start": "2026-02-03",
+      "onboarding_status": "onboarding",
+      "created_at": "2026-02-03T08:44:54.764Z",
+      "last_activity_at": "2026-02-03T08:44:54.764Z",
+      "updated_at": "2026-02-03T09:24:41.763Z"
+    }
+  ],
+  "commissions": [
+    {
+      "id": "f9023647-7239-48b2-87e9-68b3a2f32e09",
+      "ambassador_id": "2d034ed6-1c5e-48ba-bdd1-8597a9ef3443",
+      "client_id": null,
+      "amount_cents": 6700,
+      "status": "paid",
+      "period_start": "2026-02-03",
+      "period_end": "2026-02-03",
+      "note": "unico pago ",
+      "created_at": "2026-02-03T06:50:58.373Z"
+    }
+  ],
+  "appointments": [
+    {
+      "id": "4a69f624-9657-4fe0-b1f9-7fc572852bdf",
+      "ambassador_id": "f06604b5-bce8-44d7-9c52-d1e2426dff28",
+      "title": "dsgswg",
+      "client_id": null,
+      "client_name": "sgsdg",
+      "start_at": "2026-02-03T21:34:00.000Z",
+      "end_at": "2026-02-03T22:34:00.000Z",
+      "status": "cancelled",
+      "notes": "4asfaf"
+    }
+  ],
+  "audit_logs": [
+    {
+      "id": "f1f49a51-9b27-4bcc-bf4c-b9645b61433a",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "UPDATE",
+      "entity_type": "client",
+      "entity_id": "8fc33168-1a78-4371-9a62-b472946ebb6f",
+      "before_json": "{\"id\":\"8fc33168-1a78-4371-9a62-b472946ebb6f\",\"name\":\"nigga\",\"legal_name\":\"asdads\",\"industry\":\"manufacturing\",\"notes_internal\":\"niugga\",\"status\":\"active\",\"ambassador_id\":\"e33f8cc3-bda9-4192-b69f-d4b4a5b7ea27\",\"contract_value_cents\":1231400,\"contract_currency\":\"USD\",\"contract_type\":\"monthly\",\"contract_start\":\"2026-02-03\",\"onboarding_status\":\"onboarding\",\"created_at\":\"2026-02-03T08:44:54.764Z\",\"last_activity_at\":\"2026-02-03T08:44:54.764Z\",\"updated_at\":\"2026-02-03T09:24:41.763Z\"}",
+      "after_json": "{\"id\":\"8fc33168-1a78-4371-9a62-b472946ebb6f\",\"name\":\"nigga\",\"legal_name\":\"asdads\",\"industry\":\"manufacturing\",\"notes_internal\":\"niugga\",\"status\":\"active\",\"ambassador_id\":null,\"contract_value_cents\":1231400,\"contract_currency\":\"USD\",\"contract_type\":\"monthly\",\"contract_start\":\"2026-02-03\",\"onboarding_status\":\"onboarding\",\"created_at\":\"2026-02-03T08:44:54.764Z\",\"last_activity_at\":\"2026-02-03T08:44:54.764Z\",\"updated_at\":\"2026-02-03T09:24:41.763Z\"}",
+      "created_at": "2026-02-03T09:25:02.620Z"
+    },
+    {
+      "id": "ae90c60f-10ab-4145-b840-340fe6fc38fe",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "ASSIGN_AMBASSADOR",
+      "entity_type": "client",
+      "entity_id": "8fc33168-1a78-4371-9a62-b472946ebb6f",
+      "before_json": "{\"id\":\"8fc33168-1a78-4371-9a62-b472946ebb6f\",\"name\":\"nigga\",\"legal_name\":\"asdads\",\"industry\":\"manufacturing\",\"notes_internal\":\"niugga\",\"status\":\"active\",\"ambassador_id\":null,\"contract_value_cents\":1231400,\"contract_currency\":\"USD\",\"contract_type\":\"monthly\",\"contract_start\":\"2026-02-03\",\"onboarding_status\":\"onboarding\",\"created_at\":\"2026-02-03T08:44:54.764Z\",\"last_activity_at\":\"2026-02-03T08:44:54.764Z\"}",
+      "after_json": "{\"id\":\"8fc33168-1a78-4371-9a62-b472946ebb6f\",\"name\":\"nigga\",\"legal_name\":\"asdads\",\"industry\":\"manufacturing\",\"notes_internal\":\"niugga\",\"status\":\"active\",\"ambassador_id\":\"e33f8cc3-bda9-4192-b69f-d4b4a5b7ea27\",\"contract_value_cents\":1231400,\"contract_currency\":\"USD\",\"contract_type\":\"monthly\",\"contract_start\":\"2026-02-03\",\"onboarding_status\":\"onboarding\",\"created_at\":\"2026-02-03T08:44:54.764Z\",\"last_activity_at\":\"2026-02-03T08:44:54.764Z\",\"updated_at\":\"2026-02-03T09:24:41.763Z\"}",
+      "created_at": "2026-02-03T09:24:41.763Z"
+    },
+    {
+      "id": "7c70d0f1-0ba0-4416-9848-195337ddf63d",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "CREATE",
+      "entity_type": "ambassador",
+      "entity_id": "e33f8cc3-bda9-4192-b69f-d4b4a5b7ea27",
+      "before_json": null,
+      "after_json": "{\"id\":\"e33f8cc3-bda9-4192-b69f-d4b4a5b7ea27\",\"user_id\":\"3130f933-458b-4d97-b5ca-760effdf5121\",\"name\":\"agsgt\",\"status\":\"active\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"created_at\":\"2026-02-03T09:18:39.229Z\"}",
+      "created_at": "2026-02-03T09:18:39.229Z"
+    },
+    {
+      "id": "4bd1617c-3088-4887-a2ea-9563a1923b60",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "CREATE",
+      "entity_type": "user",
+      "entity_id": "3130f933-458b-4d97-b5ca-760effdf5121",
+      "before_json": null,
+      "after_json": "{\"email\":\"aegasg@gmail.com\",\"role\":\"ambassador\"}",
+      "created_at": "2026-02-03T09:18:39.229Z"
+    },
+    {
+      "id": "e937eec2-1271-40c4-865e-b54109d0a490",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "UPDATE",
+      "entity_type": "dashboard_project",
+      "entity_id": "6c239031-28ea-4a25-bcce-cde260256b55",
+      "before_json": "{\"id\":\"6c239031-28ea-4a25-bcce-cde260256b55\",\"client_id\":\"8fc33168-1a78-4371-9a62-b472946ebb6f\",\"template_key\":\"custom\",\"data_source_type\":\"google_sheets\",\"data_source_config_json\":\"{\\\"primary_date_column\\\":\\\"Date\\\"}\",\"mapping_json\":\"{\\\"production_date\\\":\\\"Date\\\",\\\"product_sku\\\":\\\"Product_ID\\\",\\\"units_produced\\\":\\\"Units_Produced\\\",\\\"scrap_count\\\":\\\"Scrap_Count\\\",\\\"operator\\\":\\\"Operator_Name\\\"}\",\"kpi_rules_json\":\"{\\\"total_production\\\":{\\\"type\\\":\\\"sum\\\",\\\"field\\\":\\\"units_produced\\\"},\\\"total_scrap\\\":{\\\"type\\\":\\\"sum\\\",\\\"field\\\":\\\"scrap_count\\\"},\\\"scrap_rate\\\":{\\\"type\\\":\\\"calc\\\",\\\"formula\\\":\\\"total_scrap / total_production\\\"}}\",\"dashboard_status\":\"configuring\",\"created_at\":\"2026-02-03T08:44:55.558Z\",\"updated_at\":\"2026-02-03T09:13:21.342Z\",\"chart_config_json\":\"{\\\"production_trend\\\":{\\\"type\\\":\\\"line\\\",\\\"metric\\\":\\\"total_production\\\",\\\"dimension\\\":\\\"production_date\\\"}}\"}",
+      "after_json": "{\"id\":\"6c239031-28ea-4a25-bcce-cde260256b55\",\"client_id\":\"8fc33168-1a78-4371-9a62-b472946ebb6f\",\"template_key\":\"custom\",\"data_source_type\":\"google_sheets\",\"data_source_config_json\":\"{\\\"primary_date_column\\\":\\\"Date\\\"}\",\"mapping_json\":\"{\\\"production_date\\\":\\\"Date\\\",\\\"product_sku\\\":\\\"Product_ID\\\",\\\"units_produced\\\":\\\"Units_Produced\\\",\\\"scrap_count\\\":\\\"Scrap_Count\\\",\\\"operator\\\":\\\"Operator_Name\\\"}\",\"kpi_rules_json\":\"{\\\"total_production\\\":{\\\"type\\\":\\\"sum\\\",\\\"field\\\":\\\"units_produced\\\"},\\\"total_scrap\\\":{\\\"type\\\":\\\"sum\\\",\\\"field\\\":\\\"scrap_count\\\"},\\\"scrap_rate\\\":{\\\"type\\\":\\\"calc\\\",\\\"formula\\\":\\\"total_scrap / total_production\\\"}}\",\"dashboard_status\":\"ready\",\"created_at\":\"2026-02-03T08:44:55.558Z\",\"updated_at\":\"2026-02-03T09:13:24.275Z\",\"chart_config_json\":\"{\\\"production_trend\\\":{\\\"type\\\":\\\"line\\\",\\\"metric\\\":\\\"total_production\\\",\\\"dimension\\\":\\\"production_date\\\"}}\"}",
+      "created_at": "2026-02-03T09:13:24.275Z"
+    },
+    {
+      "id": "faa214b2-05b0-47e0-8a93-8ce526a44477",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "UPDATE",
+      "entity_type": "dashboard_project",
+      "entity_id": "6c239031-28ea-4a25-bcce-cde260256b55",
+      "before_json": "{\"id\":\"6c239031-28ea-4a25-bcce-cde260256b55\",\"client_id\":\"8fc33168-1a78-4371-9a62-b472946ebb6f\",\"template_key\":\"custom\",\"data_source_type\":\"google_sheets\",\"data_source_config_json\":\"{\\\"primary_date_column\\\":\\\"Date\\\"}\",\"mapping_json\":\"{\\\"production_date\\\":\\\"Date\\\",\\\"product_sku\\\":\\\"Product_ID\\\",\\\"units_produced\\\":\\\"Units_Produced\\\",\\\"scrap_count\\\":\\\"Scrap_Count\\\",\\\"operator\\\":\\\"Operator_Name\\\"}\",\"kpi_rules_json\":\"{\\\"total_production\\\":{\\\"type\\\":\\\"sum\\\",\\\"field\\\":\\\"units_produced\\\"},\\\"total_scrap\\\":{\\\"type\\\":\\\"sum\\\",\\\"field\\\":\\\"scrap_count\\\"},\\\"scrap_rate\\\":{\\\"type\\\":\\\"calc\\\",\\\"formula\\\":\\\"total_scrap / total_production\\\"}}\",\"dashboard_status\":\"ready\",\"created_at\":\"2026-02-03T08:44:55.558Z\",\"updated_at\":\"2026-02-03T09:13:06.950Z\",\"chart_config_json\":\"{\\\"production_trend\\\":{\\\"type\\\":\\\"line\\\",\\\"metric\\\":\\\"total_production\\\",\\\"dimension\\\":\\\"production_date\\\"}}\"}",
+      "after_json": "{\"id\":\"6c239031-28ea-4a25-bcce-cde260256b55\",\"client_id\":\"8fc33168-1a78-4371-9a62-b472946ebb6f\",\"template_key\":\"custom\",\"data_source_type\":\"google_sheets\",\"data_source_config_json\":\"{\\\"primary_date_column\\\":\\\"Date\\\"}\",\"mapping_json\":\"{\\\"production_date\\\":\\\"Date\\\",\\\"product_sku\\\":\\\"Product_ID\\\",\\\"units_produced\\\":\\\"Units_Produced\\\",\\\"scrap_count\\\":\\\"Scrap_Count\\\",\\\"operator\\\":\\\"Operator_Name\\\"}\",\"kpi_rules_json\":\"{\\\"total_production\\\":{\\\"type\\\":\\\"sum\\\",\\\"field\\\":\\\"units_produced\\\"},\\\"total_scrap\\\":{\\\"type\\\":\\\"sum\\\",\\\"field\\\":\\\"scrap_count\\\"},\\\"scrap_rate\\\":{\\\"type\\\":\\\"calc\\\",\\\"formula\\\":\\\"total_scrap / total_production\\\"}}\",\"dashboard_status\":\"configuring\",\"created_at\":\"2026-02-03T08:44:55.558Z\",\"updated_at\":\"2026-02-03T09:13:21.342Z\",\"chart_config_json\":\"{\\\"production_trend\\\":{\\\"type\\\":\\\"line\\\",\\\"metric\\\":\\\"total_production\\\",\\\"dimension\\\":\\\"production_date\\\"}}\"}",
+      "created_at": "2026-02-03T09:13:21.342Z"
+    },
+    {
+      "id": "2d9669ff-50db-43d9-a5a5-ee252949e32e",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "UPDATE",
+      "entity_type": "dashboard_project",
+      "entity_id": "6c239031-28ea-4a25-bcce-cde260256b55",
+      "before_json": "{\"id\":\"6c239031-28ea-4a25-bcce-cde260256b55\",\"client_id\":\"8fc33168-1a78-4371-9a62-b472946ebb6f\",\"template_key\":\"custom\",\"data_source_type\":\"google_sheets\",\"data_source_config_json\":\"{\\\"primary_date_column\\\":\\\"Date\\\"}\",\"mapping_json\":\"{\\\"production_date\\\":\\\"Date\\\",\\\"product_sku\\\":\\\"Product_ID\\\",\\\"units_produced\\\":\\\"Units_Produced\\\",\\\"scrap_count\\\":\\\"Scrap_Count\\\",\\\"operator\\\":\\\"Operator_Name\\\"}\",\"kpi_rules_json\":\"{\\\"total_production\\\":{\\\"type\\\":\\\"sum\\\",\\\"field\\\":\\\"units_produced\\\"},\\\"total_scrap\\\":{\\\"type\\\":\\\"sum\\\",\\\"field\\\":\\\"scrap_count\\\"},\\\"scrap_rate\\\":{\\\"type\\\":\\\"calc\\\",\\\"formula\\\":\\\"total_scrap / total_production\\\"}}\",\"dashboard_status\":\"configuring\",\"created_at\":\"2026-02-03T08:44:55.558Z\",\"updated_at\":\"2026-02-03T09:12:58.333Z\",\"chart_config_json\":\"{\\\"production_trend\\\":{\\\"type\\\":\\\"line\\\",\\\"metric\\\":\\\"total_production\\\",\\\"dimension\\\":\\\"production_date\\\"}}\"}",
+      "after_json": "{\"id\":\"6c239031-28ea-4a25-bcce-cde260256b55\",\"client_id\":\"8fc33168-1a78-4371-9a62-b472946ebb6f\",\"template_key\":\"custom\",\"data_source_type\":\"google_sheets\",\"data_source_config_json\":\"{\\\"primary_date_column\\\":\\\"Date\\\"}\",\"mapping_json\":\"{\\\"production_date\\\":\\\"Date\\\",\\\"product_sku\\\":\\\"Product_ID\\\",\\\"units_produced\\\":\\\"Units_Produced\\\",\\\"scrap_count\\\":\\\"Scrap_Count\\\",\\\"operator\\\":\\\"Operator_Name\\\"}\",\"kpi_rules_json\":\"{\\\"total_production\\\":{\\\"type\\\":\\\"sum\\\",\\\"field\\\":\\\"units_produced\\\"},\\\"total_scrap\\\":{\\\"type\\\":\\\"sum\\\",\\\"field\\\":\\\"scrap_count\\\"},\\\"scrap_rate\\\":{\\\"type\\\":\\\"calc\\\",\\\"formula\\\":\\\"total_scrap / total_production\\\"}}\",\"dashboard_status\":\"ready\",\"created_at\":\"2026-02-03T08:44:55.558Z\",\"updated_at\":\"2026-02-03T09:13:06.950Z\",\"chart_config_json\":\"{\\\"production_trend\\\":{\\\"type\\\":\\\"line\\\",\\\"metric\\\":\\\"total_production\\\",\\\"dimension\\\":\\\"production_date\\\"}}\"}",
+      "created_at": "2026-02-03T09:13:06.950Z"
+    },
+    {
+      "id": "617896f3-2f55-4d33-b98e-da2182577e85",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "UPDATE",
+      "entity_type": "dashboard_project",
+      "entity_id": "6c239031-28ea-4a25-bcce-cde260256b55",
+      "before_json": "{\"id\":\"6c239031-28ea-4a25-bcce-cde260256b55\",\"client_id\":\"8fc33168-1a78-4371-9a62-b472946ebb6f\",\"template_key\":\"custom\",\"data_source_type\":\"google_sheets\",\"data_source_config_json\":\"{}\",\"mapping_json\":\"{}\",\"kpi_rules_json\":\"{}\",\"dashboard_status\":\"configuring\",\"created_at\":\"2026-02-03T08:44:55.558Z\",\"updated_at\":\"2026-02-03T08:45:33.317Z\"}",
+      "after_json": "{\"id\":\"6c239031-28ea-4a25-bcce-cde260256b55\",\"client_id\":\"8fc33168-1a78-4371-9a62-b472946ebb6f\",\"template_key\":\"custom\",\"data_source_type\":\"google_sheets\",\"data_source_config_json\":\"{\\\"primary_date_column\\\":\\\"Date\\\"}\",\"mapping_json\":\"{\\\"production_date\\\":\\\"Date\\\",\\\"product_sku\\\":\\\"Product_ID\\\",\\\"units_produced\\\":\\\"Units_Produced\\\",\\\"scrap_count\\\":\\\"Scrap_Count\\\",\\\"operator\\\":\\\"Operator_Name\\\"}\",\"kpi_rules_json\":\"{\\\"total_production\\\":{\\\"type\\\":\\\"sum\\\",\\\"field\\\":\\\"units_produced\\\"},\\\"total_scrap\\\":{\\\"type\\\":\\\"sum\\\",\\\"field\\\":\\\"scrap_count\\\"},\\\"scrap_rate\\\":{\\\"type\\\":\\\"calc\\\",\\\"formula\\\":\\\"total_scrap / total_production\\\"}}\",\"dashboard_status\":\"configuring\",\"created_at\":\"2026-02-03T08:44:55.558Z\",\"updated_at\":\"2026-02-03T09:12:58.333Z\",\"chart_config_json\":\"{\\\"production_trend\\\":{\\\"type\\\":\\\"line\\\",\\\"metric\\\":\\\"total_production\\\",\\\"dimension\\\":\\\"production_date\\\"}}\"}",
+      "created_at": "2026-02-03T09:12:58.334Z"
+    },
+    {
+      "id": "8b4db2cc-5b48-41f8-a65d-a591f7f342ff",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "UPDATE",
+      "entity_type": "dashboard_project",
+      "entity_id": "6c239031-28ea-4a25-bcce-cde260256b55",
+      "before_json": "{\"id\":\"6c239031-28ea-4a25-bcce-cde260256b55\",\"client_id\":\"8fc33168-1a78-4371-9a62-b472946ebb6f\",\"template_key\":\"custom\",\"data_source_type\":\"manual\",\"data_source_config_json\":\"{}\",\"mapping_json\":\"{}\",\"kpi_rules_json\":\"{}\",\"dashboard_status\":\"configuring\",\"created_at\":\"2026-02-03T08:44:55.558Z\",\"updated_at\":\"2026-02-03T08:44:55.558Z\"}",
+      "after_json": "{\"id\":\"6c239031-28ea-4a25-bcce-cde260256b55\",\"client_id\":\"8fc33168-1a78-4371-9a62-b472946ebb6f\",\"template_key\":\"custom\",\"data_source_type\":\"google_sheets\",\"data_source_config_json\":\"{}\",\"mapping_json\":\"{}\",\"kpi_rules_json\":\"{}\",\"dashboard_status\":\"configuring\",\"created_at\":\"2026-02-03T08:44:55.558Z\",\"updated_at\":\"2026-02-03T08:45:33.317Z\"}",
+      "created_at": "2026-02-03T08:45:33.317Z"
+    },
+    {
+      "id": "569b59fd-b35f-4d10-a00d-28428f8c2a84",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "CREATE",
+      "entity_type": "dashboard_project",
+      "entity_id": "6c239031-28ea-4a25-bcce-cde260256b55",
+      "before_json": null,
+      "after_json": "{\"id\":\"6c239031-28ea-4a25-bcce-cde260256b55\",\"client_id\":\"8fc33168-1a78-4371-9a62-b472946ebb6f\",\"template_key\":\"custom\",\"data_source_type\":\"manual\",\"data_source_config_json\":\"{}\",\"mapping_json\":\"{}\",\"kpi_rules_json\":\"{}\",\"dashboard_status\":\"configuring\",\"created_at\":\"2026-02-03T08:44:55.558Z\",\"updated_at\":\"2026-02-03T08:44:55.558Z\"}",
+      "created_at": "2026-02-03T08:44:55.558Z"
+    },
+    {
+      "id": "77a13ddb-0b40-4975-92b4-09cdf1baff5b",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "CREATE",
+      "entity_type": "client",
+      "entity_id": "8fc33168-1a78-4371-9a62-b472946ebb6f",
+      "before_json": null,
+      "after_json": "{\"id\":\"8fc33168-1a78-4371-9a62-b472946ebb6f\",\"name\":\"nigga\",\"legal_name\":\"asdads\",\"industry\":\"manufacturing\",\"notes_internal\":\"niugga\",\"status\":\"active\",\"ambassador_id\":null,\"contract_value_cents\":1231400,\"contract_currency\":\"USD\",\"contract_type\":\"monthly\",\"contract_start\":\"2026-02-03\",\"onboarding_status\":\"onboarding\",\"created_at\":\"2026-02-03T08:44:54.764Z\",\"last_activity_at\":\"2026-02-03T08:44:54.764Z\"}",
+      "created_at": "2026-02-03T08:44:54.764Z"
+    },
+    {
+      "id": "c946aef0-bc61-49cb-bba3-2cde62817aad",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "DELETE",
+      "entity_type": "user",
+      "entity_id": "e3afda58-d0b0-4205-b1a1-9f6eb6273f7e",
+      "before_json": "{\"id\":\"e3afda58-d0b0-4205-b1a1-9f6eb6273f7e\",\"email\":\"juka@gmail.com\",\"password_hash\":\"$2b$10$OBTJ3uA4G4GMO55ob6fedeLUg2pPq0zF7HF51exPsM74QPqgX8xmu\",\"role\":\"ambassador\",\"created_at\":\"2026-02-03T07:22:12.336Z\"}",
+      "after_json": null,
+      "created_at": "2026-02-03T08:35:03.717Z"
+    },
+    {
+      "id": "046c369e-6a23-4f67-86c9-84f6877b4c85",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "DELETE",
+      "entity_type": "ambassador",
+      "entity_id": "f06604b5-bce8-44d7-9c52-d1e2426dff28",
+      "before_json": "{\"id\":\"f06604b5-bce8-44d7-9c52-d1e2426dff28\",\"user_id\":\"e3afda58-d0b0-4205-b1a1-9f6eb6273f7e\",\"name\":\"brian \",\"status\":\"active\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"created_at\":\"2026-02-03T07:22:12.336Z\"}",
+      "after_json": null,
+      "created_at": "2026-02-03T08:35:03.717Z"
+    },
+    {
+      "id": "91520190-98fb-492e-add7-6e6a4cffb399",
+      "actor_user_id": "admin_1",
+      "action": "DELETE",
+      "entity_type": "commission",
+      "entity_id": "3c1b32bf-b324-4316-8a90-6cdecb52c8a2",
+      "before_json": "{\"id\":\"3c1b32bf-b324-4316-8a90-6cdecb52c8a2\",\"ambassador_id\":\"f06604b5-bce8-44d7-9c52-d1e2426dff28\",\"client_id\":null,\"amount_cents\":2134500,\"status\":\"paid\",\"period_start\":\"2026-02-03\",\"period_end\":\"2026-02-03\",\"note\":\"nigga\",\"created_at\":\"2026-02-03T08:17:58.098Z\"}",
+      "after_json": null,
+      "created_at": "2026-02-03T08:31:12.149Z"
+    },
+    {
+      "id": "25ddfef3-80ba-43dd-bc07-c9772bfff4df",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "CREATE",
+      "entity_type": "commission",
+      "entity_id": "3c1b32bf-b324-4316-8a90-6cdecb52c8a2",
+      "before_json": null,
+      "after_json": "{\"id\":\"3c1b32bf-b324-4316-8a90-6cdecb52c8a2\",\"ambassador_id\":\"f06604b5-bce8-44d7-9c52-d1e2426dff28\",\"client_id\":null,\"amount_cents\":2134500,\"status\":\"paid\",\"period_start\":\"2026-02-03\",\"period_end\":\"2026-02-03\",\"note\":\"nigga\",\"created_at\":\"2026-02-03T08:17:58.098Z\"}",
+      "created_at": "2026-02-03T08:17:58.098Z"
+    },
+    {
+      "id": "854f9903-7236-4faa-bebe-093a9fe19789",
+      "actor_user_id": "admin_1",
+      "action": "DELETE",
+      "entity_type": "commission",
+      "entity_id": "db952104-2307-49b9-a52e-423663e02de2",
+      "before_json": "{\"id\":\"db952104-2307-49b9-a52e-423663e02de2\",\"ambassador_id\":\"f06604b5-bce8-44d7-9c52-d1e2426dff28\",\"client_id\":null,\"amount_cents\":1242302,\"status\":\"paid\",\"period_start\":\"2026-02-03\",\"period_end\":\"2026-02-03\",\"note\":\"Manual Adjustment\",\"created_at\":\"2026-02-03T08:02:35.059Z\"}",
+      "after_json": null,
+      "created_at": "2026-02-03T08:03:34.844Z"
+    },
+    {
+      "id": "9a499d4f-7380-48e1-95ca-284895498ba5",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "CREATE",
+      "entity_type": "commission",
+      "entity_id": "db952104-2307-49b9-a52e-423663e02de2",
+      "before_json": null,
+      "after_json": "{\"id\":\"db952104-2307-49b9-a52e-423663e02de2\",\"ambassador_id\":\"f06604b5-bce8-44d7-9c52-d1e2426dff28\",\"client_id\":null,\"amount_cents\":1242302,\"status\":\"paid\",\"period_start\":\"2026-02-03\",\"period_end\":\"2026-02-03\",\"note\":\"Manual Adjustment\",\"created_at\":\"2026-02-03T08:02:35.059Z\"}",
+      "created_at": "2026-02-03T08:02:35.059Z"
+    },
+    {
+      "id": "5dd748ba-1ebd-4c49-9a10-af84eff1ddd2",
+      "actor_user_id": "admin_1",
+      "action": "DELETE",
+      "entity_type": "commission",
+      "entity_id": "a9bd8337-5b56-4af3-a914-fbb9c783c7e0",
+      "before_json": "{\"id\":\"a9bd8337-5b56-4af3-a914-fbb9c783c7e0\",\"ambassador_id\":\"f06604b5-bce8-44d7-9c52-d1e2426dff28\",\"client_id\":null,\"amount_cents\":2374,\"status\":\"paid\",\"period_start\":\"2026-02-03\",\"period_end\":\"2026-02-03\",\"note\":\"one time pay\",\"created_at\":\"2026-02-03T07:22:58.435Z\"}",
+      "after_json": null,
+      "created_at": "2026-02-03T07:57:19.272Z"
+    },
+    {
+      "id": "6179d239-3411-466b-81bc-8412ad430da2",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "UPDATE",
+      "entity_type": "ambassador",
+      "entity_id": "f06604b5-bce8-44d7-9c52-d1e2426dff28",
+      "before_json": "{\"id\":\"f06604b5-bce8-44d7-9c52-d1e2426dff28\",\"user_id\":\"e3afda58-d0b0-4205-b1a1-9f6eb6273f7e\",\"name\":\"brian \",\"status\":\"inactive\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"created_at\":\"2026-02-03T07:22:12.336Z\"}",
+      "after_json": "{\"id\":\"f06604b5-bce8-44d7-9c52-d1e2426dff28\",\"user_id\":\"e3afda58-d0b0-4205-b1a1-9f6eb6273f7e\",\"name\":\"brian \",\"status\":\"active\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"created_at\":\"2026-02-03T07:22:12.336Z\"}",
+      "created_at": "2026-02-03T07:52:29.381Z"
+    },
+    {
+      "id": "201648af-2224-4ee0-be2c-9f895f50f1f5",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "UPDATE",
+      "entity_type": "ambassador",
+      "entity_id": "f06604b5-bce8-44d7-9c52-d1e2426dff28",
+      "before_json": "{\"id\":\"f06604b5-bce8-44d7-9c52-d1e2426dff28\",\"user_id\":\"e3afda58-d0b0-4205-b1a1-9f6eb6273f7e\",\"name\":\"brian \",\"status\":\"active\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"created_at\":\"2026-02-03T07:22:12.336Z\"}",
+      "after_json": "{\"id\":\"f06604b5-bce8-44d7-9c52-d1e2426dff28\",\"user_id\":\"e3afda58-d0b0-4205-b1a1-9f6eb6273f7e\",\"name\":\"brian \",\"status\":\"inactive\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"created_at\":\"2026-02-03T07:22:12.336Z\"}",
+      "created_at": "2026-02-03T07:50:59.002Z"
+    },
+    {
+      "id": "effaeac1-53eb-464f-9130-d3135e5fadeb",
+      "actor_user_id": "e3afda58-d0b0-4205-b1a1-9f6eb6273f7e",
+      "action": "UPDATE",
+      "entity_type": "appointment",
+      "entity_id": "4a69f624-9657-4fe0-b1f9-7fc572852bdf",
+      "before_json": "{\"id\":\"4a69f624-9657-4fe0-b1f9-7fc572852bdf\",\"ambassador_id\":\"f06604b5-bce8-44d7-9c52-d1e2426dff28\",\"title\":\"dsgswg\",\"client_id\":null,\"client_name\":\"sgsdg\",\"start_at\":\"2026-02-03T21:34:00.000Z\",\"end_at\":\"2026-02-03T22:34:00.000Z\",\"status\":\"scheduled\",\"notes\":\"4asfaf\"}",
+      "after_json": "{\"id\":\"4a69f624-9657-4fe0-b1f9-7fc572852bdf\",\"ambassador_id\":\"f06604b5-bce8-44d7-9c52-d1e2426dff28\",\"title\":\"dsgswg\",\"client_id\":null,\"client_name\":\"sgsdg\",\"start_at\":\"2026-02-03T21:34:00.000Z\",\"end_at\":\"2026-02-03T22:34:00.000Z\",\"status\":\"cancelled\",\"notes\":\"4asfaf\"}",
+      "created_at": "2026-02-03T07:39:43.826Z"
+    },
+    {
+      "id": "92aa8e27-c794-4848-a391-a5678c6ac88f",
+      "actor_user_id": "f06604b5-bce8-44d7-9c52-d1e2426dff28",
+      "action": "CREATE",
+      "entity_type": "appointment",
+      "entity_id": "4a69f624-9657-4fe0-b1f9-7fc572852bdf",
+      "before_json": null,
+      "after_json": "{\"id\":\"4a69f624-9657-4fe0-b1f9-7fc572852bdf\",\"ambassador_id\":\"f06604b5-bce8-44d7-9c52-d1e2426dff28\",\"title\":\"dsgswg\",\"client_id\":null,\"client_name\":\"sgsdg\",\"start_at\":\"2026-02-03T21:34:00.000Z\",\"end_at\":\"2026-02-03T22:34:00.000Z\",\"status\":\"scheduled\",\"notes\":\"4asfaf\"}",
+      "created_at": "2026-02-03T07:37:01.984Z"
+    },
+    {
+      "id": "61d733bc-fe46-42ab-8ed6-9b2699759c53",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "CREATE",
+      "entity_type": "commission",
+      "entity_id": "a9bd8337-5b56-4af3-a914-fbb9c783c7e0",
+      "before_json": null,
+      "after_json": "{\"id\":\"a9bd8337-5b56-4af3-a914-fbb9c783c7e0\",\"ambassador_id\":\"f06604b5-bce8-44d7-9c52-d1e2426dff28\",\"client_id\":null,\"amount_cents\":2374,\"status\":\"paid\",\"period_start\":\"2026-02-03\",\"period_end\":\"2026-02-03\",\"note\":\"one time pay\",\"created_at\":\"2026-02-03T07:22:58.435Z\"}",
+      "created_at": "2026-02-03T07:22:58.435Z"
+    },
+    {
+      "id": "d33fcf67-47e7-4995-9be3-78543ff462a3",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "CREATE",
+      "entity_type": "ambassador",
+      "entity_id": "f06604b5-bce8-44d7-9c52-d1e2426dff28",
+      "before_json": null,
+      "after_json": "{\"id\":\"f06604b5-bce8-44d7-9c52-d1e2426dff28\",\"user_id\":\"e3afda58-d0b0-4205-b1a1-9f6eb6273f7e\",\"name\":\"brian \",\"status\":\"active\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"created_at\":\"2026-02-03T07:22:12.336Z\"}",
+      "created_at": "2026-02-03T07:22:12.336Z"
+    },
+    {
+      "id": "59d1dbf0-6bc5-4932-bb4d-b75137d1b0f9",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "CREATE",
+      "entity_type": "user",
+      "entity_id": "e3afda58-d0b0-4205-b1a1-9f6eb6273f7e",
+      "before_json": null,
+      "after_json": "{\"email\":\"juka@gmail.com\",\"role\":\"ambassador\"}",
+      "created_at": "2026-02-03T07:22:12.336Z"
+    },
+    {
+      "id": "5d4516c7-571a-4729-a2eb-38e37746bcb1",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "DELETE",
+      "entity_type": "user",
+      "entity_id": "user_2d034ed6",
+      "before_json": "{\"id\":\"user_2d034ed6\",\"email\":\"jukarlosxdpero2@gmail.com\",\"password_hash\":\"$2b$10$KOT0HAqKjoXdE.Z6faAs5.XHp4cfJ4fzGKLEodyFFsohCPKnll4Xe\",\"role\":\"ambassador\",\"created_at\":\"2026-02-03T06:48:48.241Z\"}",
+      "after_json": null,
+      "created_at": "2026-02-03T07:21:47.836Z"
+    },
+    {
+      "id": "c2ef652f-b3c8-4ada-88a7-c5229bb60055",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "DELETE",
+      "entity_type": "ambassador",
+      "entity_id": "2d034ed6-1c5e-48ba-bdd1-8597a9ef3443",
+      "before_json": "{\"id\":\"2d034ed6-1c5e-48ba-bdd1-8597a9ef3443\",\"user_id\":\"user_2d034ed6\",\"name\":\"john nigga\",\"status\":\"inactive\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"created_at\":\"2026-02-03T06:48:48.241Z\"}",
+      "after_json": null,
+      "created_at": "2026-02-03T07:21:47.836Z"
+    },
+    {
+      "id": "545e27f2-78e5-49d6-88e2-e50c5a7bfb7c",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "UPDATE",
+      "entity_type": "ambassador",
+      "entity_id": "2d034ed6-1c5e-48ba-bdd1-8597a9ef3443",
+      "before_json": "{\"id\":\"2d034ed6-1c5e-48ba-bdd1-8597a9ef3443\",\"user_id\":\"user_2d034ed6\",\"name\":\"john nigga\",\"status\":\"active\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"created_at\":\"2026-02-03T06:48:48.241Z\"}",
+      "after_json": "{\"id\":\"2d034ed6-1c5e-48ba-bdd1-8597a9ef3443\",\"user_id\":\"user_2d034ed6\",\"name\":\"john nigga\",\"status\":\"inactive\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"created_at\":\"2026-02-03T06:48:48.241Z\"}",
+      "created_at": "2026-02-03T07:09:31.363Z"
+    },
+    {
+      "id": "339c8b0a-e585-46b7-9425-3130a774f53f",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "UPDATE",
+      "entity_type": "ambassador",
+      "entity_id": "2d034ed6-1c5e-48ba-bdd1-8597a9ef3443",
+      "before_json": "{\"id\":\"2d034ed6-1c5e-48ba-bdd1-8597a9ef3443\",\"user_id\":\"user_2d034ed6\",\"name\":\"john nigga\",\"status\":\"inactive\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"created_at\":\"2026-02-03T06:48:48.241Z\"}",
+      "after_json": "{\"id\":\"2d034ed6-1c5e-48ba-bdd1-8597a9ef3443\",\"user_id\":\"user_2d034ed6\",\"name\":\"john nigga\",\"status\":\"active\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"created_at\":\"2026-02-03T06:48:48.241Z\"}",
+      "created_at": "2026-02-03T07:09:29.799Z"
+    },
+    {
+      "id": "79f0b386-0aa1-456e-baf5-97c1b6654e9c",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "UPDATE",
+      "entity_type": "ambassador",
+      "entity_id": "2d034ed6-1c5e-48ba-bdd1-8597a9ef3443",
+      "before_json": "{\"id\":\"2d034ed6-1c5e-48ba-bdd1-8597a9ef3443\",\"name\":\"john nigga\",\"email\":\"jukarlosxdpero2@gmail.com\",\"status\":\"active\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"password_hash\":\"$2b$10$KOT0HAqKjoXdE.Z6faAs5.XHp4cfJ4fzGKLEodyFFsohCPKnll4Xe\",\"created_at\":\"2026-02-03T06:48:48.241Z\"}",
+      "after_json": "{\"id\":\"2d034ed6-1c5e-48ba-bdd1-8597a9ef3443\",\"name\":\"john nigga\",\"email\":\"jukarlosxdpero2@gmail.com\",\"status\":\"inactive\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"password_hash\":\"$2b$10$KOT0HAqKjoXdE.Z6faAs5.XHp4cfJ4fzGKLEodyFFsohCPKnll4Xe\",\"created_at\":\"2026-02-03T06:48:48.241Z\"}",
+      "created_at": "2026-02-03T07:04:10.153Z"
+    },
+    {
+      "id": "306b3c85-4a6f-4470-836f-b3cad25bd025",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "UPDATE",
+      "entity_type": "ambassador",
+      "entity_id": "2d034ed6-1c5e-48ba-bdd1-8597a9ef3443",
+      "before_json": "{\"id\":\"2d034ed6-1c5e-48ba-bdd1-8597a9ef3443\",\"name\":\"john nigga\",\"email\":\"jukarlosxdpero2@gmail.com\",\"status\":\"inactive\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"password_hash\":\"$2b$10$KOT0HAqKjoXdE.Z6faAs5.XHp4cfJ4fzGKLEodyFFsohCPKnll4Xe\",\"created_at\":\"2026-02-03T06:48:48.241Z\"}",
+      "after_json": "{\"id\":\"2d034ed6-1c5e-48ba-bdd1-8597a9ef3443\",\"name\":\"john nigga\",\"email\":\"jukarlosxdpero2@gmail.com\",\"status\":\"active\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"password_hash\":\"$2b$10$KOT0HAqKjoXdE.Z6faAs5.XHp4cfJ4fzGKLEodyFFsohCPKnll4Xe\",\"created_at\":\"2026-02-03T06:48:48.241Z\"}",
+      "created_at": "2026-02-03T07:03:55.881Z"
+    },
+    {
+      "id": "264ce40d-44cb-45a7-9a74-b2cebf1a1ce0",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "UPDATE",
+      "entity_type": "ambassador",
+      "entity_id": "2d034ed6-1c5e-48ba-bdd1-8597a9ef3443",
+      "before_json": "{\"id\":\"2d034ed6-1c5e-48ba-bdd1-8597a9ef3443\",\"name\":\"john nigga\",\"email\":\"jukarlosxdpero2@gmail.com\",\"status\":\"active\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"password_hash\":\"$2b$10$KOT0HAqKjoXdE.Z6faAs5.XHp4cfJ4fzGKLEodyFFsohCPKnll4Xe\",\"created_at\":\"2026-02-03T06:48:48.241Z\"}",
+      "after_json": "{\"id\":\"2d034ed6-1c5e-48ba-bdd1-8597a9ef3443\",\"name\":\"john nigga\",\"email\":\"jukarlosxdpero2@gmail.com\",\"status\":\"inactive\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"password_hash\":\"$2b$10$KOT0HAqKjoXdE.Z6faAs5.XHp4cfJ4fzGKLEodyFFsohCPKnll4Xe\",\"created_at\":\"2026-02-03T06:48:48.241Z\"}",
+      "created_at": "2026-02-03T07:00:55.509Z"
+    },
+    {
+      "id": "7f6a6808-a73c-4ebc-8925-41c3435c6a34",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "UPDATE",
+      "entity_type": "ambassador",
+      "entity_id": "2d034ed6-1c5e-48ba-bdd1-8597a9ef3443",
+      "before_json": "{\"id\":\"2d034ed6-1c5e-48ba-bdd1-8597a9ef3443\",\"name\":\"john nigga\",\"email\":\"jukarlosxdpero2@gmail.com\",\"status\":\"active\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"password_hash\":\"$2b$10$e5hga7mPPIe66mQu40ZhuOtqjZ.3jHy88sYLHX14CH8H6PsOemIC6\",\"created_at\":\"2026-02-03T06:48:48.241Z\"}",
+      "after_json": "{\"id\":\"2d034ed6-1c5e-48ba-bdd1-8597a9ef3443\",\"name\":\"john nigga\",\"email\":\"jukarlosxdpero2@gmail.com\",\"status\":\"active\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"password_hash\":\"$2b$10$KOT0HAqKjoXdE.Z6faAs5.XHp4cfJ4fzGKLEodyFFsohCPKnll4Xe\",\"created_at\":\"2026-02-03T06:48:48.241Z\"}",
+      "created_at": "2026-02-03T06:52:35.540Z"
+    },
+    {
+      "id": "54e70db5-3c8a-4edd-9aef-b0082d8a4746",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "CREATE",
+      "entity_type": "commission",
+      "entity_id": "f9023647-7239-48b2-87e9-68b3a2f32e09",
+      "before_json": null,
+      "after_json": "{\"id\":\"f9023647-7239-48b2-87e9-68b3a2f32e09\",\"ambassador_id\":\"2d034ed6-1c5e-48ba-bdd1-8597a9ef3443\",\"client_id\":null,\"amount_cents\":6700,\"status\":\"paid\",\"period_start\":\"2026-02-03\",\"period_end\":\"2026-02-03\",\"note\":\"unico pago \",\"created_at\":\"2026-02-03T06:50:58.373Z\"}",
+      "created_at": "2026-02-03T06:50:58.373Z"
+    },
+    {
+      "id": "1fb5b4d4-9365-4c29-93fb-67202f36c7dc",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "CREATE",
+      "entity_type": "ambassador",
+      "entity_id": "2d034ed6-1c5e-48ba-bdd1-8597a9ef3443",
+      "before_json": null,
+      "after_json": "{\"id\":\"2d034ed6-1c5e-48ba-bdd1-8597a9ef3443\",\"name\":\"john nigga\",\"email\":\"jukarlosxdpero2@gmail.com\",\"status\":\"active\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"password_hash\":\"$2b$10$e5hga7mPPIe66mQu40ZhuOtqjZ.3jHy88sYLHX14CH8H6PsOemIC6\",\"created_at\":\"2026-02-03T06:48:48.241Z\"}",
+      "created_at": "2026-02-03T06:48:48.241Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "3130f933-458b-4d97-b5ca-760effdf5121",
+      "email": "aegasg@gmail.com",
+      "password_hash": "$2b$10$cvYd4SqdF8PzDBX4uLkT0u0buEgNl2irpoMU5yp3my.XH4agqxYq.",
+      "role": "ambassador",
+      "created_at": "2026-02-03T09:18:39.229Z"
+    }
+  ],
+  "dashboard_projects": [
+    {
+      "id": "6c239031-28ea-4a25-bcce-cde260256b55",
+      "client_id": "8fc33168-1a78-4371-9a62-b472946ebb6f",
+      "template_key": "custom",
+      "data_source_type": "google_sheets",
+      "data_source_config_json": "{\"primary_date_column\":\"Date\"}",
+      "mapping_json": "{\"production_date\":\"Date\",\"product_sku\":\"Product_ID\",\"units_produced\":\"Units_Produced\",\"scrap_count\":\"Scrap_Count\",\"operator\":\"Operator_Name\"}",
+      "kpi_rules_json": "{\"total_production\":{\"type\":\"sum\",\"field\":\"units_produced\"},\"total_scrap\":{\"type\":\"sum\",\"field\":\"scrap_count\"},\"scrap_rate\":{\"type\":\"calc\",\"formula\":\"total_scrap / total_production\"}}",
+      "dashboard_status": "ready",
+      "created_at": "2026-02-03T08:44:55.558Z",
+      "updated_at": "2026-02-03T09:13:24.275Z",
+      "chart_config_json": "{\"production_trend\":{\"type\":\"line\",\"metric\":\"total_production\",\"dimension\":\"production_date\"}}"
+    }
+  ],
+  "ai_threads": [],
+  "ai_messages": []
+}

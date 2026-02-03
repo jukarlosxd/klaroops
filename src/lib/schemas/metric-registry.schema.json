@@ -1,0 +1,94 @@
+{
+  "registryVersion": "metric-registry.v1",
+  "metrics": [
+    {
+      "metricId": "fin.total_revenue",
+      "labels": { "en": "Total Revenue", "es": "Ingresos Totales" },
+      "description": {
+        "en": "Sum of paid invoice amounts in the selected period.",
+        "es": "Suma de facturas pagadas en el periodo seleccionado."
+      },
+      "unit": "currency",
+      "format": "money",
+      "requiredEventTypes": ["invoice_paid"],
+      "formulaRef": "sum(measures.amount) where eventType='invoice_paid'",
+      "dimensionsSupported": ["currency", "country", "channel", "plan"]
+    },
+    {
+      "metricId": "fin.net_profit",
+      "labels": { "en": "Net Profit", "es": "Beneficio Neto" },
+      "description": {
+        "en": "Revenue minus expenses in the selected period.",
+        "es": "Ingresos menos gastos en el periodo seleccionado."
+      },
+      "unit": "currency",
+      "format": "money",
+      "requiredEventTypes": ["invoice_paid", "expense_recorded"],
+      "formulaRef": "sum(invoice_paid.amount) - sum(expense_recorded.amount)"
+    },
+    {
+      "metricId": "fin.gross_margin_pct",
+      "labels": { "en": "Gross Margin", "es": "Margen Bruto" },
+      "description": {
+        "en": "Gross margin percentage based on revenue and cost of goods (COGS).",
+        "es": "Porcentaje de margen bruto basado en ingresos y costo de ventas (COGS)."
+      },
+      "unit": "percent",
+      "format": "percent",
+      "requiredEventTypes": ["invoice_paid", "expense_recorded"],
+      "formulaRef": "(revenue - cogs) / revenue",
+      "notes": {
+        "en": "Expenses must include a dimension cost_type='cogs' to compute correctly.",
+        "es": "Los gastos deben incluir dimension cost_type='cogs' para calcular correctamente."
+      }
+    },
+    {
+      "metricId": "saas.mrr",
+      "labels": { "en": "Monthly Recurring Revenue (MRR)", "es": "Ingresos Recurrentes Mensuales (MRR)" },
+      "description": {
+        "en": "Recurring revenue active in the selected month.",
+        "es": "Ingreso recurrente activo en el mes seleccionado."
+      },
+      "unit": "currency",
+      "format": "money",
+      "requiredEventTypes": ["subscription_started", "subscription_renewed", "subscription_canceled"],
+      "formulaRef": "sum(active_subscriptions.monthly_amount at month_end)"
+    },
+    {
+      "metricId": "saas.churn_rate_pct",
+      "labels": { "en": "Customer Churn Rate", "es": "Tasa de Abandono" },
+      "description": {
+        "en": "Canceled customers divided by active customers at period start.",
+        "es": "Clientes cancelados dividido por clientes activos al inicio del periodo."
+      },
+      "unit": "percent",
+      "format": "percent",
+      "requiredEventTypes": ["subscription_canceled", "subscription_started", "subscription_renewed"],
+      "formulaRef": "canceled_customers / active_customers_at_start"
+    },
+    {
+      "metricId": "saas.cac",
+      "labels": { "en": "Customer Acquisition Cost (CAC)", "es": "Costo de Adquisición (CAC)" },
+      "description": {
+        "en": "Marketing spend divided by number of new customers in period.",
+        "es": "Gasto de marketing dividido por nuevos clientes en el periodo."
+      },
+      "unit": "currency",
+      "format": "money",
+      "requiredEventTypes": ["marketing_spend", "customer_created"],
+      "formulaRef": "sum(marketing_spend.amount) / count(customer_created)"
+    },
+    {
+      "metricId": "saas.ltv",
+      "labels": { "en": "Customer Lifetime Value (LTV)", "es": "Valor de Vida del Cliente (LTV)" },
+      "description": {
+        "en": "Estimated LTV based on ARPA and churn. (Model-based.)",
+        "es": "LTV estimado según ARPA y churn. (Basado en modelo.)"
+      },
+      "unit": "currency",
+      "format": "money",
+      "requiredEventTypes": ["invoice_paid", "subscription_canceled", "subscription_started", "subscription_renewed"],
+      "formulaRef": "(sum(invoice_paid.amount) / count(distinct customer_id)) / saas.churn_rate_pct"
+    }
+  ]
+}

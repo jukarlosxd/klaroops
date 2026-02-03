@@ -1,11 +1,14 @@
-import Link from 'next/link';
+import { getClient } from '@/lib/db';
+import { notFound } from 'next/navigation';
+import SettingsForm from '@/components/SettingsForm';
 
-export default function SettingsPage() {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Settings</h1>
-      <p>Not implemented in MVP.</p>
-      <Link href=".." className="text-blue-600 underline">Back to Dashboard</Link>
-    </div>
-  );
+export default function SettingsPage({ params, searchParams }: { params: { clientId: string }, searchParams: { tenantId: string } }) {
+  const tenantId = searchParams.tenantId;
+  const client = getClient(tenantId, params.clientId);
+  
+  if (!client) {
+    notFound();
+  }
+
+  return <SettingsForm client={client} tenantId={tenantId} />;
 }

@@ -109,4 +109,4 @@ src/
     -   `lib/sheets.ts`: Mock this if no credentials provided, or allow generic Google Sheets API setup.
     -   `lib/db.ts`: Use a simple in-memory or file-based store (like `better-sqlite3` or just a JSON file for MVP) if no DB provided.
     -   `api/chat`: Implement the "Metrics Interpreter" logic (simple prompt engineering).
--   **Task 3**: Verify the app runs.
+-   **Task 3**: Verify the app run

@@ -1,4 +1,4 @@
-import { RawEvent } from '@/lib/db';
+import type { RawEvent } from '@/types/client';
 import { formatDistanceToNow } from 'date-fns';
 
 export function BrokenTable({ assets }: { assets: RawEvent[] }) {
@@ -20,11 +20,11 @@ export function BrokenTable({ assets }: { assets: RawEvent[] }) {
         </thead>
         <tbody className="divide-y">
           {assets.map(asset => (
-            <tr key={asset.asset_id}>
-              <td className="px-6 py-4 font-medium">{asset.asset_id}</td>
-              <td className="px-6 py-4">{asset.area}</td>
-              <td className="px-6 py-4 text-red-600">{asset.note || 'No details'}</td>
-              <td className="px-6 py-4 text-gray-500">{formatDistanceToNow(new Date(asset.timestamp), { addSuffix: true })}</td>
+            <tr key={asset.eventId}>
+              <td className="px-6 py-4 font-medium">{asset.payload.asset_id}</td>
+              <td className="px-6 py-4">{asset.payload.area}</td>
+              <td className="px-6 py-4 text-red-600">{asset.payload.note || 'No details'}</td>
+              <td className="px-6 py-4 text-gray-500">{formatDistanceToNow(new Date(asset.time.occurredAt), { addSuffix: true })}</td>
             </tr>
           ))}
         </tbody>

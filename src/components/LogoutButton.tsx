@@ -10,7 +10,7 @@ export default function LogoutButton() {
 
   return (
     <button 
-      onClick={() => signOut({ callbackUrl: '/login' })}
+      onClick={() => signOut({ callbackUrl: '/' })}
       className="flex items-center gap-2 text-sm text-gray-500 hover:text-black transition-colors"
     >
       <span className="hidden md:inline">Logout</span>
