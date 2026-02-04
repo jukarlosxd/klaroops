@@ -29,10 +29,22 @@ function LoginForm() {
       setError('Invalid email or password');
       setLoading(false);
     } else {
-      // Check session to redirect based on role
-      // For now, redirect to /admin/dashboard since we are focusing on admin
-      // In a real scenario, we would fetch the session here or rely on middleware redirect
-      router.push('/admin/dashboard');
+      // Fetch session to determine redirection
+      const sessionRes = await fetch('/api/auth/session');
+      const session = await sessionRes.json();
+      
+      const role = session?.user?.role;
+      
+      if (role === 'admin') {
+          router.push('/admin/dashboard');
+      } else if (role === 'ambassador') {
+          router.push('/dashboard');
+      } else if (role === 'client_user') {
+          router.push('/app'); // Client Portal
+      } else {
+          router.push('/');
+      }
+      
       router.refresh();
     }
   };

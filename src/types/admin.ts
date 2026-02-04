@@ -112,13 +112,20 @@ export interface Appointment {
   start_at: string;
   end_at: string;
   status: AppointmentStatus;
-  notes?: string;
+  notes?:export type Role = 'admin' | 'ambassador' | 'client_user';
+
+export interface ClientUser {
+  id: string;
+  user_id: string; // Link to User
+  client_id: string; // Link to Client
+  created_at: string;
 }
 
 export interface AdminDB {
   users: User[];
   ambassadors: Ambassador[];
   clients: Client[];
+  client_users: ClientUser[];
   commissions: Commission[];
   appointments: Appointment[];
   audit_logs: AuditLog[];

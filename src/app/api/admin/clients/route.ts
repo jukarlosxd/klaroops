@@ -20,9 +20,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
 
-    const newClient = await createClient(body, actorId);
-    
-    return NextResponse.json(newClient, { status: 201 });
+    try {
+        const newClient = await createClient(body, actorId);
+        return NextResponse.json(newClient, { status: 201 });
+    } catch (e: any) {
+        return NextResponse.json({ error: e.message }, { status: 400 });
+    }
   } catch (error) {
     console.error('Error creating client:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

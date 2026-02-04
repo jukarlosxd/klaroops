@@ -44,6 +44,7 @@ function readDB(): AdminDB {
       users: [],
       ambassadors: [],
       clients: [],
+      client_users: [],
       commissions: [],
       appointments: [],
       audit_logs: [],
@@ -72,6 +73,7 @@ function readDB(): AdminDB {
     if (!db.dashboard_projects) db.dashboard_projects = [];
     if (!db.ai_threads) db.ai_threads = [];
     if (!db.ai_messages) db.ai_messages = [];
+    if (!db.client_users) db.client_users = [];
     return db;
   } catch (error) {
     console.error("Error reading DB, returning empty", error);
@@ -79,6 +81,7 @@ function readDB(): AdminDB {
       users: [], 
       ambassadors: [], 
       clients: [], 
+      client_users: [],
       commissions: [], 
       appointments: [], 
       audit_logs: [],
@@ -304,15 +307,66 @@ export const updateClient = async (id: string, data: Partial<Client>, actorId: s
   return newData;
 };
 
-export const createClient = async (data: Omit<Client, 'id' | 'created_at' | 'last_activity_at'>, actorId: string) => {
+export const getClientByUserId = async (userId: string) => {
   const db = readDB();
+  const relation = db.client_users.find(cu => cu.user_id === userId);
+  if (!relation) return null;
+  return db.clients.find(c => c.id === relation.client_id) || null;
+};
+
+export const createClient = async (
+    data: Omit<Client, 'id' | 'created_at' | 'last_activity_at'> & { 
+        login_email?: string, 
+        login_password?: string 
+    }, 
+    actorId: string
+) => {
+  const db = readDB();
+  
+  // 1. If login credentials provided, create User first
+  let newUserId = null;
+  if (data.login_email && data.login_password) {
+      const emailNorm = data.login_email.trim().toLowerCase();
+      if (db.users.some(u => u.email.toLowerCase() === emailNorm)) {
+          throw new Error('Client Login Email already exists');
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash(data.login_password, salt);
+      
+      const newUser: User = {
+          id: uuidv4(),
+          email: emailNorm,
+          password_hash: hash,
+          role: 'client_user',
+          created_at: new Date().toISOString()
+      };
+      db.users.push(newUser);
+      newUserId = newUser.id;
+      logAudit(db, actorId, 'CREATE', 'user', newUser.id, null, { email: newUser.email, role: 'client_user' });
+  }
+
+  // 2. Create Client
+  const { login_email, login_password, ...clientData } = data; // Remove login props from client data
+  
   const newClient: Client = {
     id: uuidv4(),
-    ...data,
+    ...clientData,
     created_at: new Date().toISOString(),
     last_activity_at: new Date().toISOString()
   };
   db.clients.push(newClient);
+
+  // 3. Link User to Client
+  if (newUserId) {
+      db.client_users.push({
+          id: uuidv4(),
+          user_id: newUserId,
+          client_id: newClient.id,
+          created_at: new Date().toISOString()
+      });
+  }
+
   logAudit(db, actorId, 'CREATE', 'client', newClient.id, null, newClient);
   writeDB(db);
   return newClient;

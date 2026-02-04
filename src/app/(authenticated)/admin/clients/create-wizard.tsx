@@ -9,7 +9,8 @@ import {
   Building2, 
   FileText, 
   LayoutDashboard,
-  Bot
+  Bot,
+  Lock
 } from 'lucide-react';
 import { Ambassador } from '@/types/admin';
 
@@ -32,6 +33,10 @@ export default function CreateClientWizard({ ambassadors, onClose, onSuccess }: 
         industry: '',
         notes_internal: '',
         
+        // Step 1.5: Access (New)
+        login_email: '',
+        login_password: '',
+
         // Step 2: Contract
         ambassador_id: '',
         contract_value: '',
@@ -60,6 +65,10 @@ export default function CreateClientWizard({ ambassadors, onClose, onSuccess }: 
                     legal_name: formData.legal_name,
                     industry: formData.industry,
                     notes_internal: formData.notes_internal,
+                    
+                    login_email: formData.login_email || undefined,
+                    login_password: formData.login_password || undefined,
+
                     status: 'active',
                     
                     ambassador_id: formData.ambassador_id || null,
@@ -186,6 +195,43 @@ export default function CreateClientWizard({ ambassadors, onClose, onSuccess }: 
                                     />
                                 </div>
                             </div>
+
+                            {/* Client Access Section */}
+                            <div className="border-t pt-6">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="p-2 bg-gray-100 text-gray-600 rounded-lg">
+                                        <Lock size={20} />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-gray-900">Client Portal Access</h3>
+                                        <p className="text-xs text-gray-500">Create credentials for the client to view their dashboard.</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="col-span-2 md:col-span-1">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Client Login Email</label>
+                                        <input 
+                                            type="email" 
+                                            className="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
+                                            placeholder="client@company.com"
+                                            value={formData.login_email}
+                                            onChange={e => setFormData({...formData, login_email: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="col-span-2 md:col-span-1">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                        <input 
+                                            type="password" 
+                                            className="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none"
+                                            placeholder="Set initial password"
+                                            value={formData.login_password}
+                                            onChange={e => setFormData({...formData, login_password: e.target.value})}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     )}
 

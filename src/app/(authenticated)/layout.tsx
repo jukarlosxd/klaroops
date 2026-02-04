@@ -22,7 +22,8 @@ export default async function AuthenticatedLayout({
   
   // Force admin role check based on email if role is missing (failsafe)
   const isAdmin = session.user?.email === process.env.ADMIN_EMAIL || (session.user as any)?.role === 'admin';
-  const role = isAdmin ? 'admin' : 'ambassador';
+  const role = (session.user as any)?.role || (isAdmin ? 'admin' : 'ambassador');
+  const isClient = role === 'client_user';
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -31,7 +32,7 @@ export default async function AuthenticatedLayout({
         <div className="p-6 border-b">
           <h1 className="text-xl font-bold">KlaroOps</h1>
           <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mt-1">
-            {isAdmin ? 'Admin Panel' : 'Ambassador Panel'}
+            {isAdmin ? 'Admin Panel' : (isClient ? 'Client Portal' : 'Ambassador Panel')}
           </p>
         </div>
         
@@ -61,6 +62,12 @@ export default async function AuthenticatedLayout({
                 Settings
               </Link>
             </>
+          ) : isClient ? (
+             // Client User Navigation
+             <Link href="/app" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-100 text-gray-700 font-medium">
+                <LayoutDashboard size={20} className="text-blue-600" />
+                My Dashboard
+             </Link>
           ) : (
             // Ambassador Navigation
             <>

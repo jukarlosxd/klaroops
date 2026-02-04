@@ -1,7 +1,7 @@
 import { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from 'bcryptjs';
-import { getUserByEmail, getAmbassadorByUserId } from "@/lib/admin-db";
+import { getUserByEmail, getAmbassadorByUserId, getClientByUserId } from "@/lib/admin-db";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -44,11 +44,15 @@ export const authOptions: AuthOptions = {
                 return null;
             }
 
-            // Get ambassador profile name if available
-            let name = "Ambassador";
+            // Get profile name if available
+            let name = "User";
             if (user.role === 'ambassador') {
                 const amb = await getAmbassadorByUserId(user.id);
                 if (amb) name = amb.name;
+            } else if (user.role === 'client_user') {
+                const client = await getClientByUserId(user.id);
+                if (client) name = client.name;
+                else name = 'Client User';
             }
 
             console.log(`[AUTH] Login successful for ${name}`);
