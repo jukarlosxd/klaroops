@@ -790,29 +790,77 @@ export default function Home() {
                                 {/* Right Column: Form */}
                                 <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
                                     <h2 className="text-2xl font-bold mb-6">{t.ambassador.form.title}</h2>
-                                    <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); alert('Application submitted!'); }}>
+                                    <form className="space-y-4" onSubmit={async (e) => { 
+                                        e.preventDefault(); 
+                                        const form = e.target as HTMLFormElement;
+                                        const btn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+                                        const originalText = btn.innerText;
+                                        
+                                        // Simple form data extraction
+                                        const formData = {
+                                            full_name: (form.querySelector('input[name="name"]') as HTMLInputElement).value,
+                                            email: (form.querySelector('input[name="email"]') as HTMLInputElement).value,
+                                            city_state: (form.querySelector('input[name="city"]') as HTMLInputElement).value,
+                                            phone: (form.querySelector('input[name="phone"]') as HTMLInputElement).value,
+                                            // Combine extra fields into message
+                                            message: `
+                                                Experience: ${(form.querySelector('select[name="experience"]') as HTMLSelectElement).value}
+                                                Contacts: ${(form.querySelector('input[name="contacts"]') as HTMLInputElement).value}
+                                                Why: ${(form.querySelector('textarea[name="why"]') as HTMLTextAreaElement).value}
+                                            `,
+                                            company: (form.querySelector('input[name="company_honeypot"]') as HTMLInputElement).value // Honeypot
+                                        };
+
+                                        btn.disabled = true;
+                                        btn.innerText = 'Sending...';
+
+                                        try {
+                                            const res = await fetch('/api/ambassador-apply', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify(formData)
+                                            });
+                                            
+                                            if (res.ok) {
+                                                alert('Application submitted successfully! We will contact you soon.');
+                                                form.reset();
+                                                switchView('home');
+                                            } else {
+                                                const err = await res.json();
+                                                alert('Error: ' + (err.error || 'Failed to submit'));
+                                            }
+                                        } catch (error) {
+                                            alert('Network error. Please try again.');
+                                        }
+                                        
+                                        btn.disabled = false;
+                                        btn.innerText = originalText;
+                                    }}>
+                                        {/* Honeypot Field (Hidden) */}
+                                        <input type="text" name="company_honeypot" style={{display: 'none'}} tabIndex={-1} autoComplete="off" />
+
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">{t.ambassador.form.fields.name}</label>
-                                            <input type="text" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
+                                            <input name="name" type="text" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">{t.ambassador.form.fields.email}</label>
-                                            <input type="email" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
+                                            <input name="email" type="email" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">{t.ambassador.form.fields.city}</label>
-                                                <input type="text" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
+                                                <input name="city" type="text" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">{t.ambassador.form.fields.whatsapp}</label>
-                                                <input type="tel" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
+                                                <input name="phone" type="tel" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">{t.ambassador.form.fields.experience}</label>
-                                                <select className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                                <select name="experience" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                                                     <option value="">Select...</option>
                                                     <option value="yes">Yes / Sí</option>
                                                     <option value="no">No</option>
@@ -820,15 +868,15 @@ export default function Home() {
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">{t.ambassador.form.fields.contacts}</label>
-                                                <input type="text" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
+                                                <input name="contacts" type="text" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
                                             </div>
                                         </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">{t.ambassador.form.fields.why}</label>
-                                            <textarea rows={3} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required></textarea>
+                                            <textarea name="why" rows={3} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required></textarea>
                                         </div>
                                         
-                                        <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">
+                                        <button type="submit" className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
                                             {t.ambassador.form.submit}
                                         </button>
                                         

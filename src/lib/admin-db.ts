@@ -2,17 +2,18 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { 
-  AdminDB, 
-  User, 
-  Ambassador, 
-  Client, 
-  Commission, 
-  Appointment, 
-  AuditLog,
-  DashboardProject,
-  AIThread,
-  AIMessage
-} from '@/types/admin';
+    AdminDB, 
+    User, 
+    Ambassador, 
+    AmbassadorApplication,
+    Client, 
+    Commission, 
+    Appointment, 
+    AuditLog,
+    DashboardProject,
+    AIThread,
+    AIMessage
+  } from '@/types/admin';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 
@@ -43,6 +44,7 @@ function readDB(): AdminDB {
     const initialDB: AdminDB = {
       users: [],
       ambassadors: [],
+      ambassador_applications: [],
       clients: [],
       client_users: [],
       commissions: [],
@@ -74,12 +76,14 @@ function readDB(): AdminDB {
     if (!db.ai_threads) db.ai_threads = [];
     if (!db.ai_messages) db.ai_messages = [];
     if (!db.client_users) db.client_users = [];
+    if (!db.ambassador_applications) db.ambassador_applications = [];
     return db;
   } catch (error) {
     console.error("Error reading DB, returning empty", error);
     return { 
       users: [], 
       ambassadors: [], 
+      ambassador_applications: [],
       clients: [], 
       client_users: [],
       commissions: [], 
@@ -274,6 +278,21 @@ export const deleteAmbassador = async (id: string, actorId: string) => {
 
   writeDB(db);
   return true;
+};
+
+export const createAmbassadorApplication = async (data: Omit<AmbassadorApplication, 'id' | 'created_at' | 'status'>, ip: string, userAgent: string) => {
+  const db = readDB();
+  const newApp: AmbassadorApplication = {
+    id: uuidv4(),
+    ...data,
+    status: 'new',
+    ip_address: ip,
+    user_agent: userAgent,
+    created_at: new Date().toISOString()
+  };
+  db.ambassador_applications.unshift(newApp);
+  writeDB(db);
+  return newApp;
 };
 
 // --- Clients ---

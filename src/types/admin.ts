@@ -122,9 +122,23 @@ export interface ClientUser {
   created_at: string;
 }
 
+export interface AmbassadorApplication {
+  id: string;
+  full_name: string;
+  email: string;
+  phone?: string;
+  city_state?: string;
+  message: string;
+  status: 'new' | 'contacted' | 'approved' | 'rejected' | 'email_failed';
+  ip_address?: string;
+  user_agent?: string;
+  created_at: string;
+}
+
 export interface AdminDB {
   users: User[];
   ambassadors: Ambassador[];
+  ambassador_applications: AmbassadorApplication[];
   clients: Client[];
   client_users: ClientUser[];
   commissions: Commission[];
