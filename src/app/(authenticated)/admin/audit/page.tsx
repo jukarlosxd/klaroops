@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic';
 export default async function AuditLogPage(props: { searchParams: Promise<any> }) {
   await props.searchParams; // Consume searchParams even if not used to satisfy Next.js 15
   const rawLogs = await getAuditLogs();
-  const logs = Array.isArray(rawLogs) ? rawLogs : [];
+  // Ensure rawLogs is an array and sort by created_at descending if possible
+  const logs = Array.isArray(rawLogs) ? [...rawLogs].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) : [];
 
   return (
     <div className="space-y-6">
