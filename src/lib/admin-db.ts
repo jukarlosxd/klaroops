@@ -731,6 +731,7 @@ export const seedData = async () => {
 
   // 1. Create Users
   const users: User[] = [
+      { id: 'user_admin', email: 'system@klaroops.com', password_hash: demoHash, role: 'admin', created_at: new Date().toISOString() },
       { id: 'user_amb_1', email: 'carlos@demo.com', password_hash: demoHash, role: 'ambassador', created_at: new Date().toISOString() },
       { id: 'user_amb_2', email: 'maria@demo.com', password_hash: demoHash, role: 'ambassador', created_at: new Date().toISOString() }
   ];
