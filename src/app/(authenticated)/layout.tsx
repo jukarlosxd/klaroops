@@ -27,7 +27,10 @@ export default async function AuthenticatedLayout({
   let newAppsCount = 0;
   if (isAdmin) {
       const apps = await getAmbassadorApplications();
-      newAppsCount = apps.filter(a => a.status === 'new').length;
+      // Safe check to prevent layout crash
+      if (Array.isArray(apps)) {
+          newAppsCount = apps.filter(a => a.status === 'new').length;
+      }
   }
 
   return (
