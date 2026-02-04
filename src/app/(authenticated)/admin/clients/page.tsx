@@ -3,7 +3,8 @@ import ClientsClient from './client';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ClientsPage() {
+export default async function ClientsPage(props: { searchParams: Promise<any> }) {
+  await props.searchParams;
   try {
     const clients = (await getClients()) || [];
     const ambassadors = (await getAmbassadors()) || [];

@@ -4,7 +4,8 @@ import AmbassadorsClient from './client';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AmbassadorsPage() {
+export default async function AmbassadorsPage(props: { searchParams: Promise<any> }) {
+  await props.searchParams;
   const ambassadors = await getAmbassadors();
   const allClients = await getClients();
   const allCommissions = await getCommissions();
