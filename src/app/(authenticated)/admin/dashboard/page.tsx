@@ -3,7 +3,8 @@ import { Users, DollarSign, Target, TrendingUp, AlertCircle, Briefcase } from 'l
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminDashboardPage() {
+export default async function AdminDashboardPage(props: { searchParams: Promise<any> }) {
+  await props.searchParams; // Consume searchParams even if not used to satisfy Next.js 15
   const stats = await getAdminStats();
 
   return (
