@@ -5,16 +5,20 @@ import AmbassadorsClient from './client';
 export const dynamic = 'force-dynamic';
 
 export default async function AmbassadorsPage() {
-  const ambassadors = (await getAmbassadors()) || [];
-  const allClients = (await getClients()) || [];
-  const allCommissions = (await getCommissions()) || [];
+  const ambassadors = await getAmbassadors();
+  const allClients = await getClients();
+  const allCommissions = await getCommissions();
+
+  const safeAmbassadors = Array.isArray(ambassadors) ? ambassadors : [];
+  const safeClients = Array.isArray(allClients) ? allClients : [];
+  const safeCommissions = Array.isArray(allCommissions) ? allCommissions : [];
 
   // Calculate KPIs per ambassador
-  const enrichedAmbassadors = ambassadors.map(amb => {
-    const clients = Array.isArray(allClients) ? allClients.filter(c => c.ambassador_id === amb.id) : [];
+  const enrichedAmbassadors = safeAmbassadors.map(amb => {
+    const clients = safeClients.filter(c => c.ambassador_id === amb.id);
     const activeClients = clients.filter(c => c.status === 'active').length;
     
-    const commissions = Array.isArray(allCommissions) ? allCommissions.filter(c => c.ambassador_id === amb.id) : [];
+    const commissions = safeCommissions.filter(c => c.ambassador_id === amb.id);
     const pendingCommissionCents = commissions
       .filter(c => c.status === 'pending')
       .reduce((sum, c) => sum + c.amount_cents, 0);
