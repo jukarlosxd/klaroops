@@ -137,6 +137,14 @@ export interface AmbassadorApplication {
   created_at: string;
 }
 
+export interface SystemConfig {
+  id: string; // 'google_auth'
+  access_token: string | null;
+  refresh_token: string | null;
+  token_expiry: number | null; // Timestamp
+  updated_at: string;
+}
+
 export interface AdminDB {
   users: User[];
   ambassadors: Ambassador[];
@@ -149,4 +157,5 @@ export interface AdminDB {
   dashboard_projects: DashboardProject[];
   ai_threads: AIThread[];
   ai_messages: AIMessage[];
+  system_config?: SystemConfig; // Optional for backward compatibility
 }

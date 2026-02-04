@@ -781,3 +781,29 @@ export const getAdminStats = async () => {
     paidCommissions: db.commissions.filter(c => c.status === 'paid').reduce((s, c) => s + (c.amount_cents / 100), 0),
   };
 };
+
+export const getSystemConfig = async () => {
+  const db = readDB();
+  return db.system_config || null;
+};
+
+export const updateSystemConfig = async (data: Partial<import('@/types/admin').SystemConfig>) => {
+  const db = readDB();
+  const current = db.system_config || {
+    id: 'google_auth',
+    access_token: null,
+    refresh_token: null,
+    token_expiry: null,
+    updated_at: new Date().toISOString()
+  };
+
+  db.system_config = {
+    ...current,
+    ...data,
+    updated_at: new Date().toISOString()
+  };
+
+  writeDB(db);
+  return db.system_config;
+};
+

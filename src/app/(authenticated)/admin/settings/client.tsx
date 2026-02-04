@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Database, Save, Download } from 'lucide-react';
+import { Database, Save, Download, Globe, CheckCircle, AlertTriangle } from 'lucide-react';
 // import { seedData } from '@/lib/admin-db'; // Removed direct import to avoid server/client conflict
 
-export default function SettingsClient() {
+export default function SettingsClient({ googleConfig }: { googleConfig: any }) {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
+
+  const isGoogleConnected = googleConfig?.access_token && googleConfig?.refresh_token;
 
   const handleSeed = async () => {
     if (!confirm('This will reset/overwrite data. Continue?')) return;
@@ -21,9 +23,63 @@ export default function SettingsClient() {
     setLoading(false);
   };
 
+  const handleConnectGoogle = () => {
+    window.location.href = '/api/auth/google/start';
+  };
+
   return (
     <div className="space-y-6 max-w-4xl">
       <h1 className="text-2xl font-bold tracking-tight">Admin Settings</h1>
+
+      {/* Google Integration */}
+      <div className="bg-white p-6 rounded-xl border shadow-sm">
+        <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+          <Globe className="text-blue-600" size={20} />
+          Google Integration
+        </h2>
+        <div className="bg-blue-50 p-4 rounded-lg mb-4 text-sm text-blue-800 border border-blue-100">
+            <p className="font-bold mb-1">How it works:</p>
+            <p>1. Connect the system admin account (system@klaroops.com).</p>
+            <p>2. Clients share their Google Sheets with <strong>system@klaroops.com</strong> (View Access).</p>
+            <p>3. Klaroops can then read those sheets to build dashboards.</p>
+        </div>
+
+        <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50">
+            <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${isGoogleConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                <div>
+                    <p className="font-medium text-gray-900">Google Sheets API</p>
+                    <p className="text-xs text-gray-500">
+                        {isGoogleConnected 
+                            ? `Connected (Last updated: ${new Date(googleConfig.updated_at).toLocaleDateString()})` 
+                            : 'Not connected'}
+                    </p>
+                </div>
+            </div>
+            
+            {isGoogleConnected ? (
+                <div className="flex items-center gap-2">
+                     <span className="flex items-center gap-1 text-green-600 text-sm font-medium bg-green-50 px-3 py-1 rounded-full border border-green-200">
+                        <CheckCircle size={14} />
+                        Active
+                     </span>
+                     <button 
+                        onClick={handleConnectGoogle}
+                        className="text-sm text-blue-600 hover:underline ml-2"
+                     >
+                        Reconnect
+                     </button>
+                </div>
+            ) : (
+                <button 
+                    onClick={handleConnectGoogle}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition flex items-center gap-2"
+                >
+                    Connect Account
+                </button>
+            )}
+        </div>
+      </div>
 
       {/* Admin Profile */}
       <div className="bg-white p-6 rounded-xl border shadow-sm">

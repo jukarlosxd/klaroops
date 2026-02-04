@@ -1,6 +1,23 @@
 {
   "ambassadors": [],
-  "clients": [],
+  "clients": [
+    {
+      "id": "13aac5bd-d67b-462d-a1b1-8510230c9df5",
+      "name": "faojf",
+      "legal_name": "dfgdfgd",
+      "industry": "manufacturing",
+      "notes_internal": "asdasffgg",
+      "status": "active",
+      "ambassador_id": null,
+      "contract_value_cents": 1233400,
+      "contract_currency": "USD",
+      "contract_type": "monthly",
+      "contract_start": "2026-02-04",
+      "onboarding_status": "new",
+      "created_at": "2026-02-04T02:28:26.621Z",
+      "last_activity_at": "2026-02-04T02:28:26.621Z"
+    }
+  ],
   "commissions": [
     {
       "id": "f9023647-7239-48b2-87e9-68b3a2f32e09",
@@ -28,6 +45,56 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": "8a376b1f-b585-459a-a7ab-d2cf3cc8eed5",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "CREATE",
+      "entity_type": "dashboard_project",
+      "entity_id": "2b730660-a2a0-4f90-9a97-f9b64a06ab41",
+      "before_json": null,
+      "after_json": "{\"id\":\"2b730660-a2a0-4f90-9a97-f9b64a06ab41\",\"client_id\":\"13aac5bd-d67b-462d-a1b1-8510230c9df5\",\"template_key\":\"custom\",\"data_source_type\":\"manual\",\"data_source_config_json\":\"{}\",\"mapping_json\":\"{}\",\"kpi_rules_json\":\"{}\",\"dashboard_status\":\"configuring\",\"created_at\":\"2026-02-04T02:28:27.428Z\",\"updated_at\":\"2026-02-04T02:28:27.428Z\"}",
+      "created_at": "2026-02-04T02:28:27.428Z"
+    },
+    {
+      "id": "86a8641c-355e-4805-a729-ac97c7fc0315",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "CREATE",
+      "entity_type": "client",
+      "entity_id": "13aac5bd-d67b-462d-a1b1-8510230c9df5",
+      "before_json": null,
+      "after_json": "{\"id\":\"13aac5bd-d67b-462d-a1b1-8510230c9df5\",\"name\":\"faojf\",\"legal_name\":\"dfgdfgd\",\"industry\":\"manufacturing\",\"notes_internal\":\"asdasffgg\",\"status\":\"active\",\"ambassador_id\":null,\"contract_value_cents\":1233400,\"contract_currency\":\"USD\",\"contract_type\":\"monthly\",\"contract_start\":\"2026-02-04\",\"onboarding_status\":\"new\",\"created_at\":\"2026-02-04T02:28:26.621Z\",\"last_activity_at\":\"2026-02-04T02:28:26.621Z\"}",
+      "created_at": "2026-02-04T02:28:26.621Z"
+    },
+    {
+      "id": "7d28b786-cb8f-4dd2-ae66-501f1849230c",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "CREATE",
+      "entity_type": "user",
+      "entity_id": "35f6bfa4-e2b5-42ae-8789-d7339dc556a4",
+      "before_json": null,
+      "after_json": "{\"email\":\"juka@gmail.com\",\"role\":\"client_user\"}",
+      "created_at": "2026-02-04T02:28:26.621Z"
+    },
+    {
+      "id": "c64640c2-7653-4a80-8165-1874b6b89295",
+      "actor_user_id": "admin_1",
+      "action": "UPDATE_STATUS",
+      "entity_type": "ambassador_application",
+      "entity_id": "06461c8b-d1f5-4d79-84d1-529204a9dfbe",
+      "before_json": "{\"id\":\"06461c8b-d1f5-4d79-84d1-529204a9dfbe\",\"full_name\":\"juan florez\",\"email\":\"jukarlosxdpero2@gmail.com\",\"phone\":\"3855597773\",\"city_state\":\"neiva\",\"message\":\"\\n                                                Experience: no\\n                                                Contacts: idk\\n                                                Why: quiero pene\\n                                            \",\"status\":\"rejected\",\"ip_address\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.107.1 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36\",\"created_at\":\"2026-02-04T00:14:26.778Z\",\"updated_at\":\"2026-02-04T02:27:42.576Z\"}",
+      "after_json": "{\"id\":\"06461c8b-d1f5-4d79-84d1-529204a9dfbe\",\"full_name\":\"juan florez\",\"email\":\"jukarlosxdpero2@gmail.com\",\"phone\":\"3855597773\",\"city_state\":\"neiva\",\"message\":\"\\n                                                Experience: no\\n                                                Contacts: idk\\n                                                Why: quiero pene\\n                                            \",\"status\":\"contacted\",\"ip_address\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.107.1 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36\",\"created_at\":\"2026-02-04T00:14:26.778Z\",\"updated_at\":\"2026-02-04T02:27:44.513Z\"}",
+      "created_at": "2026-02-04T02:27:44.513Z"
+    },
+    {
+      "id": "9ca02cb3-6b9c-421d-a06b-8bafdafa43bd",
+      "actor_user_id": "admin_1",
+      "action": "UPDATE_STATUS",
+      "entity_type": "ambassador_application",
+      "entity_id": "06461c8b-d1f5-4d79-84d1-529204a9dfbe",
+      "before_json": "{\"id\":\"06461c8b-d1f5-4d79-84d1-529204a9dfbe\",\"full_name\":\"juan florez\",\"email\":\"jukarlosxdpero2@gmail.com\",\"phone\":\"3855597773\",\"city_state\":\"neiva\",\"message\":\"\\n                                                Experience: no\\n                                                Contacts: idk\\n                                                Why: quiero pene\\n                                            \",\"status\":\"contacted\",\"ip_address\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.107.1 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36\",\"created_at\":\"2026-02-04T00:14:26.778Z\",\"updated_at\":\"2026-02-04T00:26:31.110Z\"}",
+      "after_json": "{\"id\":\"06461c8b-d1f5-4d79-84d1-529204a9dfbe\",\"full_name\":\"juan florez\",\"email\":\"jukarlosxdpero2@gmail.com\",\"phone\":\"3855597773\",\"city_state\":\"neiva\",\"message\":\"\\n                                                Experience: no\\n                                                Contacts: idk\\n                                                Why: quiero pene\\n                                            \",\"status\":\"rejected\",\"ip_address\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.107.1 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36\",\"created_at\":\"2026-02-04T00:14:26.778Z\",\"updated_at\":\"2026-02-04T02:27:42.576Z\"}",
+      "created_at": "2026-02-04T02:27:42.577Z"
+    },
     {
       "id": "b02105b5-e84b-4dba-b9e5-ea0db7d03f8c",
       "actor_user_id": "jukarlosxd@gmail.com",
@@ -429,11 +496,39 @@
       "created_at": "2026-02-03T06:48:48.241Z"
     }
   ],
-  "users": [],
-  "dashboard_projects": [],
+  "users": [
+    {
+      "id": "35f6bfa4-e2b5-42ae-8789-d7339dc556a4",
+      "email": "juka@gmail.com",
+      "password_hash": "$2b$10$FwbowulZ6UTGsKgSKdaSvusHYXiNhE8Ud0qCqA0cQN2MpcxxTAbAG",
+      "role": "client_user",
+      "created_at": "2026-02-04T02:28:26.621Z"
+    }
+  ],
+  "dashboard_projects": [
+    {
+      "id": "2b730660-a2a0-4f90-9a97-f9b64a06ab41",
+      "client_id": "13aac5bd-d67b-462d-a1b1-8510230c9df5",
+      "template_key": "custom",
+      "data_source_type": "manual",
+      "data_source_config_json": "{}",
+      "mapping_json": "{}",
+      "kpi_rules_json": "{}",
+      "dashboard_status": "configuring",
+      "created_at": "2026-02-04T02:28:27.428Z",
+      "updated_at": "2026-02-04T02:28:27.428Z"
+    }
+  ],
   "ai_threads": [],
   "ai_messages": [],
-  "client_users": [],
+  "client_users": [
+    {
+      "id": "4369c6a2-9bf1-42f1-87f3-5eded73780c4",
+      "user_id": "35f6bfa4-e2b5-42ae-8789-d7339dc556a4",
+      "client_id": "13aac5bd-d67b-462d-a1b1-8510230c9df5",
+      "created_at": "2026-02-04T02:28:26.621Z"
+    }
+  ],
   "ambassador_applications": [
     {
       "id": "06461c8b-d1f5-4d79-84d1-529204a9dfbe",
@@ -446,7 +541,7 @@
       "ip_address": "::1",
       "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.107.1 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
       "created_at": "2026-02-04T00:14:26.778Z",
-      "updated_at": "2026-02-04T00:26:31.110Z"
+      "updated_at": "2026-02-04T02:27:44.513Z"
     }
   ]
 }
