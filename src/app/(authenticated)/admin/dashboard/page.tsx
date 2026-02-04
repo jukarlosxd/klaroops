@@ -24,7 +24,7 @@ export default async function AdminDashboardPage() {
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-sm text-gray-500 font-medium">Total Ambassadors</p>
-              <h3 className="text-3xl font-bold mt-1 text-gray-900">{stats.totalAmbassadors}</h3>
+              <h3 className="text-3xl font-bold mt-1 text-gray-900">{stats.totalAmbassadors || 0}</h3>
             </div>
             <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
               <Briefcase size={20} />
@@ -36,7 +36,7 @@ export default async function AdminDashboardPage() {
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-sm text-gray-500 font-medium">Active Clients</p>
-              <h3 className="text-3xl font-bold mt-1 text-gray-900">{stats.totalClients}</h3>
+              <h3 className="text-3xl font-bold mt-1 text-gray-900">{stats.totalClients || 0}</h3>
             </div>
             <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
               <Users size={20} />
@@ -48,7 +48,7 @@ export default async function AdminDashboardPage() {
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-sm text-gray-500 font-medium">Leads (Month)</p>
-              <h3 className="text-3xl font-bold mt-1 text-gray-900">{stats.leadsThisMonth}</h3>
+              <h3 className="text-3xl font-bold mt-1 text-gray-900">{stats.leadsThisMonth || 0}</h3>
             </div>
             <div className="p-2 bg-orange-50 text-orange-600 rounded-lg">
               <Target size={20} />
@@ -61,7 +61,7 @@ export default async function AdminDashboardPage() {
             <div>
               <p className="text-sm text-gray-500 font-medium">Pending Commissions</p>
               <h3 className="text-3xl font-bold mt-1 text-red-600">
-                ${stats.pendingCommissions.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                ${(stats.pendingCommissions || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
               </h3>
             </div>
             <div className="p-2 bg-red-50 text-red-600 rounded-lg">
