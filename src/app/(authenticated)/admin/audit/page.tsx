@@ -5,7 +5,8 @@ import { Clock } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 
 export default async function AuditLogPage() {
-  const logs = await getAuditLogs();
+  const rawLogs = await getAuditLogs();
+  const logs = Array.isArray(rawLogs) ? rawLogs : [];
 
   return (
     <div className="space-y-6">
