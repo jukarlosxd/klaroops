@@ -848,15 +848,18 @@ export default function Home() {
                                                 body: JSON.stringify(formData)
                                             });
                                             
+                                            const data = await res.json();
+
                                             if (res.ok) {
                                                 alert('Application submitted successfully! We will contact you soon.');
                                                 form.reset();
                                                 switchView('home');
                                             } else {
-                                                const err = await res.json();
-                                                alert('Error: ' + (err.error || 'Failed to submit'));
+                                                console.error('Submission Error:', data);
+                                                alert('Error: ' + (data.error || 'Failed to submit'));
                                             }
                                         } catch (error) {
+                                            console.error('Network Error:', error);
                                             alert('Network error. Please try again.');
                                         }
                                         
