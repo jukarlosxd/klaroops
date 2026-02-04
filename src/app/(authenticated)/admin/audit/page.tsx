@@ -4,7 +4,8 @@ import { Clock } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AuditLogPage() {
+export default async function AuditLogPage(props: { searchParams: Promise<any> }) {
+  await props.searchParams; // Consume searchParams even if not used to satisfy Next.js 15
   const rawLogs = await getAuditLogs();
   const logs = Array.isArray(rawLogs) ? rawLogs : [];
 
