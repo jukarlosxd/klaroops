@@ -28,8 +28,20 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
   const stats = await getAmbassadorApplicationStats();
   const allApplications = await getAmbassadorApplications();
 
+  // Safely handle potential undefined arrays
+  const safeStats = stats || {
+      newToday: 0,
+      newYesterday: 0,
+      totalLast7Days: 0,
+      deltaToday: 0,
+      deltaWeekly: 0,
+      deltaWeeklyPercent: 0,
+      totalNew: 0
+  };
+  const safeApplications = Array.isArray(allApplications) ? allApplications : [];
+
   // Filter Logic
-  let filteredApps = [...allApplications];
+  let filteredApps = [...safeApplications];
   
   if (searchParams.status && searchParams.status !== 'all') {
       filteredApps = filteredApps.filter(a => a.status === searchParams.status);
@@ -67,26 +79,26 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <KpiCard 
                 title="New Today" 
-                value={stats.newToday} 
-                subValue={`${stats.deltaToday >= 0 ? '+' : ''}${stats.deltaToday} vs yesterday`}
-                trend={stats.deltaToday >= 0 ? 'up' : 'down'}
+                value={safeStats.newToday} 
+                subValue={`${safeStats.deltaToday >= 0 ? '+' : ''}${safeStats.deltaToday} vs yesterday`}
+                trend={safeStats.deltaToday >= 0 ? 'up' : 'down'}
             />
             <KpiCard 
                 title="Last 7 Days" 
-                value={stats.totalLast7Days} 
-                subValue={`${stats.deltaWeeklyPercent}% vs prev week`}
-                trend={stats.deltaWeekly >= 0 ? 'up' : 'down'}
+                value={safeStats.totalLast7Days} 
+                subValue={`${safeStats.deltaWeeklyPercent}% vs prev week`}
+                trend={safeStats.deltaWeekly >= 0 ? 'up' : 'down'}
             />
             <KpiCard 
                 title="Pending Review" 
-                value={stats.totalNew} 
+                value={safeStats.totalNew} 
                 subValue="Needs action"
                 trend="neutral"
                 color="blue"
             />
             <KpiCard 
                 title="Total Applications" 
-                value={allApplications.length} 
+                value={safeApplications.length} 
                 subValue="All time"
                 trend="neutral"
             />
