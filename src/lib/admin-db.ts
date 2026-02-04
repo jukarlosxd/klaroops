@@ -763,7 +763,8 @@ export const seedData = async () => {
     dashboard_projects: [],
     ai_threads: [],
     ai_messages: [],
-    client_users: []
+    client_users: [],
+    ambassador_applications: []
   };
   writeDB(db);
   return true;
