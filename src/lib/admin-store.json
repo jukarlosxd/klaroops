@@ -1,23 +1,6 @@
 {
   "ambassadors": [],
-  "clients": [
-    {
-      "id": "13aac5bd-d67b-462d-a1b1-8510230c9df5",
-      "name": "faojf",
-      "legal_name": "dfgdfgd",
-      "industry": "manufacturing",
-      "notes_internal": "asdasffgg",
-      "status": "active",
-      "ambassador_id": null,
-      "contract_value_cents": 1233400,
-      "contract_currency": "USD",
-      "contract_type": "monthly",
-      "contract_start": "2026-02-04",
-      "onboarding_status": "new",
-      "created_at": "2026-02-04T02:28:26.621Z",
-      "last_activity_at": "2026-02-04T02:28:26.621Z"
-    }
-  ],
+  "clients": [],
   "commissions": [
     {
       "id": "f9023647-7239-48b2-87e9-68b3a2f32e09",
@@ -45,6 +28,36 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": "bd5a3b22-3d3d-4cc4-a7e1-80c71a3153ff",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "DELETE",
+      "entity_type": "client",
+      "entity_id": "13aac5bd-d67b-462d-a1b1-8510230c9df5",
+      "before_json": "{\"id\":\"13aac5bd-d67b-462d-a1b1-8510230c9df5\",\"name\":\"faojf\",\"legal_name\":\"dfgdfgd\",\"industry\":\"manufacturing\",\"notes_internal\":\"asdasffgg\",\"status\":\"active\",\"ambassador_id\":null,\"contract_value_cents\":1233400,\"contract_currency\":\"USD\",\"contract_type\":\"monthly\",\"contract_start\":\"2026-02-04\",\"onboarding_status\":\"new\",\"created_at\":\"2026-02-04T02:28:26.621Z\",\"last_activity_at\":\"2026-02-04T02:28:26.621Z\"}",
+      "after_json": null,
+      "created_at": "2026-02-04T20:03:29.080Z"
+    },
+    {
+      "id": "afc8c803-dddc-42d7-b445-792b16bd4257",
+      "actor_user_id": "admin_1",
+      "action": "UPDATE_STATUS",
+      "entity_type": "ambassador_application",
+      "entity_id": "0c1e6c53-3e27-4d3c-a4ac-da4f7b24320e",
+      "before_json": "{\"id\":\"0c1e6c53-3e27-4d3c-a4ac-da4f7b24320e\",\"full_name\":\"juka\",\"email\":\"asfdaf@gmail.com\",\"phone\":\"safaf\",\"city_state\":\"afaf\",\"message\":\"\\n                                                Experience: yes\\n                                                Contacts: asfaf\\n                                                Why: asff\\n                                            \",\"status\":\"contacted\",\"ip_address\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.107.1 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36\",\"created_at\":\"2026-02-04T20:02:59.517Z\",\"updated_at\":\"2026-02-04T20:03:14.856Z\"}",
+      "after_json": "{\"id\":\"0c1e6c53-3e27-4d3c-a4ac-da4f7b24320e\",\"full_name\":\"juka\",\"email\":\"asfdaf@gmail.com\",\"phone\":\"safaf\",\"city_state\":\"afaf\",\"message\":\"\\n                                                Experience: yes\\n                                                Contacts: asfaf\\n                                                Why: asff\\n                                            \",\"status\":\"rejected\",\"ip_address\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.107.1 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36\",\"created_at\":\"2026-02-04T20:02:59.517Z\",\"updated_at\":\"2026-02-04T20:03:16.032Z\"}",
+      "created_at": "2026-02-04T20:03:16.032Z"
+    },
+    {
+      "id": "ea56932a-504c-46d8-ae1a-337c64885ea7",
+      "actor_user_id": "admin_1",
+      "action": "UPDATE_STATUS",
+      "entity_type": "ambassador_application",
+      "entity_id": "0c1e6c53-3e27-4d3c-a4ac-da4f7b24320e",
+      "before_json": "{\"id\":\"0c1e6c53-3e27-4d3c-a4ac-da4f7b24320e\",\"full_name\":\"juka\",\"email\":\"asfdaf@gmail.com\",\"phone\":\"safaf\",\"city_state\":\"afaf\",\"message\":\"\\n                                                Experience: yes\\n                                                Contacts: asfaf\\n                                                Why: asff\\n                                            \",\"status\":\"new\",\"ip_address\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.107.1 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36\",\"created_at\":\"2026-02-04T20:02:59.517Z\"}",
+      "after_json": "{\"id\":\"0c1e6c53-3e27-4d3c-a4ac-da4f7b24320e\",\"full_name\":\"juka\",\"email\":\"asfdaf@gmail.com\",\"phone\":\"safaf\",\"city_state\":\"afaf\",\"message\":\"\\n                                                Experience: yes\\n                                                Contacts: asfaf\\n                                                Why: asff\\n                                            \",\"status\":\"contacted\",\"ip_address\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.107.1 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36\",\"created_at\":\"2026-02-04T20:02:59.517Z\",\"updated_at\":\"2026-02-04T20:03:14.856Z\"}",
+      "created_at": "2026-02-04T20:03:14.856Z"
+    },
     {
       "id": "8a376b1f-b585-459a-a7ab-d2cf3cc8eed5",
       "actor_user_id": "jukarlosxd@gmail.com",
@@ -505,31 +518,24 @@
       "created_at": "2026-02-04T02:28:26.621Z"
     }
   ],
-  "dashboard_projects": [
-    {
-      "id": "2b730660-a2a0-4f90-9a97-f9b64a06ab41",
-      "client_id": "13aac5bd-d67b-462d-a1b1-8510230c9df5",
-      "template_key": "custom",
-      "data_source_type": "manual",
-      "data_source_config_json": "{}",
-      "mapping_json": "{}",
-      "kpi_rules_json": "{}",
-      "dashboard_status": "configuring",
-      "created_at": "2026-02-04T02:28:27.428Z",
-      "updated_at": "2026-02-04T02:28:27.428Z"
-    }
-  ],
+  "dashboard_projects": [],
   "ai_threads": [],
   "ai_messages": [],
-  "client_users": [
-    {
-      "id": "4369c6a2-9bf1-42f1-87f3-5eded73780c4",
-      "user_id": "35f6bfa4-e2b5-42ae-8789-d7339dc556a4",
-      "client_id": "13aac5bd-d67b-462d-a1b1-8510230c9df5",
-      "created_at": "2026-02-04T02:28:26.621Z"
-    }
-  ],
+  "client_users": [],
   "ambassador_applications": [
+    {
+      "id": "0c1e6c53-3e27-4d3c-a4ac-da4f7b24320e",
+      "full_name": "juka",
+      "email": "asfdaf@gmail.com",
+      "phone": "safaf",
+      "city_state": "afaf",
+      "message": "\n                                                Experience: yes\n                                                Contacts: asfaf\n                                                Why: asff\n                                            ",
+      "status": "rejected",
+      "ip_address": "::1",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.107.1 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
+      "created_at": "2026-02-04T20:02:59.517Z",
+      "updated_at": "2026-02-04T20:03:16.032Z"
+    },
     {
       "id": "06461c8b-d1f5-4d79-84d1-529204a9dfbe",
       "full_name": "juan florez",
