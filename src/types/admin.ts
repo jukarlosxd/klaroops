@@ -132,6 +132,8 @@ export interface AmbassadorApplication {
   status: 'new' | 'contacted' | 'approved' | 'rejected' | 'email_failed';
   ip_address?: string;
   user_agent?: string;
+  notes_internal?: string;
+  updated_at?: string;
   created_at: string;
 }
 

@@ -295,6 +295,64 @@ export const createAmbassadorApplication = async (data: Omit<AmbassadorApplicati
   return newApp;
 };
 
+export const getAmbassadorApplications = async () => {
+  const db = readDB();
+  return db.ambassador_applications;
+};
+
+export const updateAmbassadorApplicationStatus = async (id: string, status: AmbassadorApplication['status'], actorId: string, notes?: string) => {
+  const db = readDB();
+  const index = db.ambassador_applications.findIndex(a => a.id === id);
+  if (index === -1) return null;
+
+  const oldData = { ...db.ambassador_applications[index] };
+  const newData = { 
+      ...oldData, 
+      status, 
+      notes_internal: notes ?? oldData.notes_internal,
+      updated_at: new Date().toISOString() 
+  };
+  
+  db.ambassador_applications[index] = newData;
+  logAudit(db, actorId, 'UPDATE_STATUS', 'ambassador_application', id, oldData, newData);
+  writeDB(db);
+  return newData;
+};
+
+export const getAmbassadorApplicationStats = async () => {
+  const db = readDB();
+  const apps = db.ambassador_applications;
+  const now = new Date();
+  
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+  const yesterdayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).toISOString();
+  const yesterdayEnd = todayStart;
+  
+  const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const prevWeekStart = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString();
+  
+  const newToday = apps.filter(a => a.created_at >= todayStart && a.status === 'new').length;
+  const newYesterday = apps.filter(a => a.created_at >= yesterdayStart && a.created_at < yesterdayEnd && a.status === 'new').length;
+  
+  const totalLast7Days = apps.filter(a => a.created_at >= weekStart).length;
+  const totalPrev7Days = apps.filter(a => a.created_at >= prevWeekStart && a.created_at < weekStart).length;
+
+  // Calculate Deltas
+  const deltaToday = newToday - newYesterday;
+  const deltaWeekly = totalLast7Days - totalPrev7Days;
+  const deltaWeeklyPercent = totalPrev7Days === 0 ? 100 : Math.round(((totalLast7Days - totalPrev7Days) / totalPrev7Days) * 100);
+
+  return {
+      newToday,
+      newYesterday,
+      totalLast7Days,
+      deltaToday,
+      deltaWeekly,
+      deltaWeeklyPercent,
+      totalNew: apps.filter(a => a.status === 'new').length
+  };
+};
+
 // --- Clients ---
 
 export const getClients = async () => {

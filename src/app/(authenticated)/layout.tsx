@@ -1,8 +1,9 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Calendar, LogOut, Shield, Users, Briefcase, Settings } from "lucide-react";
+import { LayoutDashboard, Calendar, LogOut, Shield, Users, Briefcase, Settings, Inbox } from "lucide-react";
 import { authOptions } from '@/lib/auth';
+import { getAmbassadorApplications } from '@/lib/admin-db'; // For Badge
 
 import SignOutButton from "@/components/SignOutButton";
 
@@ -13,9 +14,6 @@ export default async function AuthenticatedLayout({
 }) {
   const session = await getServerSession(authOptions);
   
-  // Debug Log
-  console.log("AuthenticatedLayout Session:", JSON.stringify(session, null, 2));
-
   if (!session) {
     redirect("/login");
   }
@@ -24,6 +22,13 @@ export default async function AuthenticatedLayout({
   const isAdmin = session.user?.email === process.env.ADMIN_EMAIL || (session.user as any)?.role === 'admin';
   const role = (session.user as any)?.role || (isAdmin ? 'admin' : 'ambassador');
   const isClient = role === 'client_user';
+
+  // Badge Logic (Admin Only)
+  let newAppsCount = 0;
+  if (isAdmin) {
+      const apps = await getAmbassadorApplications();
+      newAppsCount = apps.filter(a => a.status === 'new').length;
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -44,6 +49,19 @@ export default async function AuthenticatedLayout({
                 <LayoutDashboard size={20} className="text-blue-600" />
                 Home Admin
               </Link>
+              
+              <Link href="/admin/applications" className="flex items-center justify-between p-2.5 rounded-lg hover:bg-gray-100 text-gray-700 font-medium">
+                <div className="flex items-center gap-3">
+                    <Inbox size={20} className="text-purple-600" />
+                    Applications
+                </div>
+                {newAppsCount > 0 && (
+                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                        {newAppsCount}
+                    </span>
+                )}
+              </Link>
+
               <div className="pt-4 pb-2 px-3 text-xs font-semibold text-gray-400 uppercase">Management</div>
               <Link href="/admin/ambassadors" className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-100 text-gray-700 font-medium">
                 <Users size={20} />
