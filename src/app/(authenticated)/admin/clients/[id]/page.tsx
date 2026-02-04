@@ -10,7 +10,8 @@ import { notFound } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ClientDetailPage({ params }: { params: { id: string } }) {
+export default async function ClientDetailPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const client = await getClientById(params.id);
     

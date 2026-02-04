@@ -1,14 +1,5 @@
 {
-  "ambassadors": [
-    {
-      "id": "e33f8cc3-bda9-4192-b69f-d4b4a5b7ea27",
-      "user_id": "3130f933-458b-4d97-b5ca-760effdf5121",
-      "name": "agsgt",
-      "status": "active",
-      "commission_rule_json": "{\"rate\": 0.10}",
-      "created_at": "2026-02-03T09:18:39.229Z"
-    }
-  ],
+  "ambassadors": [],
   "clients": [],
   "commissions": [
     {
@@ -37,6 +28,36 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": "b02105b5-e84b-4dba-b9e5-ea0db7d03f8c",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "DELETE",
+      "entity_type": "user",
+      "entity_id": "3130f933-458b-4d97-b5ca-760effdf5121",
+      "before_json": "{\"id\":\"3130f933-458b-4d97-b5ca-760effdf5121\",\"email\":\"aegasg@gmail.com\",\"password_hash\":\"$2b$10$cvYd4SqdF8PzDBX4uLkT0u0buEgNl2irpoMU5yp3my.XH4agqxYq.\",\"role\":\"ambassador\",\"created_at\":\"2026-02-03T09:18:39.229Z\"}",
+      "after_json": null,
+      "created_at": "2026-02-04T01:03:21.964Z"
+    },
+    {
+      "id": "3009f426-3eab-4930-90d9-508d0baa7baf",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "DELETE",
+      "entity_type": "ambassador",
+      "entity_id": "e33f8cc3-bda9-4192-b69f-d4b4a5b7ea27",
+      "before_json": "{\"id\":\"e33f8cc3-bda9-4192-b69f-d4b4a5b7ea27\",\"user_id\":\"3130f933-458b-4d97-b5ca-760effdf5121\",\"name\":\"agsgt\",\"status\":\"inactive\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"created_at\":\"2026-02-03T09:18:39.229Z\"}",
+      "after_json": null,
+      "created_at": "2026-02-04T01:03:21.964Z"
+    },
+    {
+      "id": "16ece9d1-1f86-408b-99d7-1bd3b6a6786b",
+      "actor_user_id": "jukarlosxd@gmail.com",
+      "action": "UPDATE",
+      "entity_type": "ambassador",
+      "entity_id": "e33f8cc3-bda9-4192-b69f-d4b4a5b7ea27",
+      "before_json": "{\"id\":\"e33f8cc3-bda9-4192-b69f-d4b4a5b7ea27\",\"user_id\":\"3130f933-458b-4d97-b5ca-760effdf5121\",\"name\":\"agsgt\",\"status\":\"active\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"created_at\":\"2026-02-03T09:18:39.229Z\"}",
+      "after_json": "{\"id\":\"e33f8cc3-bda9-4192-b69f-d4b4a5b7ea27\",\"user_id\":\"3130f933-458b-4d97-b5ca-760effdf5121\",\"name\":\"agsgt\",\"status\":\"inactive\",\"commission_rule_json\":\"{\\\"rate\\\": 0.10}\",\"created_at\":\"2026-02-03T09:18:39.229Z\"}",
+      "created_at": "2026-02-04T01:02:52.918Z"
+    },
     {
       "id": "1f722be1-0834-40f9-8768-acfabbbeba57",
       "actor_user_id": "jukarlosxd@gmail.com",
@@ -408,15 +429,7 @@
       "created_at": "2026-02-03T06:48:48.241Z"
     }
   ],
-  "users": [
-    {
-      "id": "3130f933-458b-4d97-b5ca-760effdf5121",
-      "email": "aegasg@gmail.com",
-      "password_hash": "$2b$10$cvYd4SqdF8PzDBX4uLkT0u0buEgNl2irpoMU5yp3my.XH4agqxYq.",
-      "role": "ambassador",
-      "created_at": "2026-02-03T09:18:39.229Z"
-    }
-  ],
+  "users": [],
   "dashboard_projects": [],
   "ai_threads": [],
   "ai_messages": [],
