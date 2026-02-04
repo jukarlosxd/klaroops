@@ -6,12 +6,14 @@ export const dynamic = 'force-dynamic';
 
 export default async function AuditLogPage(props: { searchParams: Promise<any> }) {
   await props.searchParams; // Consume searchParams even if not used to satisfy Next.js 15
-  const rawLogs = await getAuditLogs();
-  // Ensure rawLogs is an array and sort by created_at descending if possible
-  const logs = Array.isArray(rawLogs) ? [...rawLogs].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) : [];
+  
+  try {
+    const rawLogs = await getAuditLogs();
+    // Ensure rawLogs is an array and sort by created_at descending if possible
+    const logs = Array.isArray(rawLogs) ? [...rawLogs].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) : [];
 
-  return (
-    <div className="space-y-6">
+    return (
+      <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold tracking-tight">System Audit Log</h1>
       </div>
@@ -75,4 +77,12 @@ export default async function AuditLogPage(props: { searchParams: Promise<any> }
       </div>
     </div>
   );
+  } catch (error) {
+    console.error("Error loading audit logs:", error);
+    return (
+      <div className="p-8 text-center text-red-600">
+        Error loading audit logs.
+      </div>
+    );
+  }
 }
