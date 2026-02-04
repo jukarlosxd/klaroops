@@ -220,6 +220,26 @@ export default function ClientDetailClient({
     setLoading(false);
   };
 
+  const handleDeleteClient = async () => {
+    if (!confirm('Are you sure you want to DELETE this client? This action cannot be undone and will remove all associated data including dashboard configuration.')) return;
+    setLoading(true);
+    try {
+        const res = await fetch(`/api/admin/clients/${client.id}`, {
+            method: 'DELETE',
+        });
+        
+        if (!res.ok) throw new Error(await res.text());
+        
+        alert('Client deleted successfully');
+        router.push('/admin/clients');
+        
+    } catch (error: any) {
+        console.error(error);
+        alert('Failed to delete client');
+        setLoading(false);
+    }
+  };
+
   const filteredAmbassadors = ambassadors.filter(a => 
     a.name.toLowerCase().includes(assignSearch.toLowerCase()) || 
     (a.email || '').toLowerCase().includes(assignSearch.toLowerCase())
@@ -249,6 +269,14 @@ export default function ClientDetailClient({
         
         {/* Actions */}
         <div className="flex gap-2">
+            <button 
+                onClick={handleDeleteClient}
+                disabled={loading}
+                className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-medium text-sm transition"
+            >
+                <X size={16} />
+                Delete
+            </button>
             {project?.dashboard_status === 'ready' && (
                 <button 
                     onClick={() => window.open(`/dashboard/view/${client.id}`, '_blank')}

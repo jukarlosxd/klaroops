@@ -384,6 +384,31 @@ export const updateClient = async (id: string, data: Partial<Client>, actorId: s
   return newData;
 };
 
+export const deleteClient = async (id: string, actorId: string) => {
+  const db = readDB();
+  const index = db.clients.findIndex(c => c.id === id);
+  if (index === -1) return null;
+
+  const client = db.clients[index];
+  
+  // 1. Remove Client
+  db.clients.splice(index, 1);
+  logAudit(db, actorId, 'DELETE', 'client', id, client, null);
+
+  // 2. Remove Related Data (Optional but recommended)
+  // Remove dashboard project
+  const projIndex = db.dashboard_projects.findIndex(p => p.client_id === id);
+  if (projIndex !== -1) db.dashboard_projects.splice(projIndex, 1);
+  
+  // Remove Client Users links
+  db.client_users = db.client_users.filter(cu => cu.client_id !== id);
+  
+  // Note: We keep commissions and logs for historical reasons usually, but could delete if requested.
+  
+  writeDB(db);
+  return true;
+};
+
 export const getClientByUserId = async (userId: string) => {
   const db = readDB();
   const relation = db.client_users.find(cu => cu.user_id === userId);
