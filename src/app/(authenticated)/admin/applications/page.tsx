@@ -21,7 +21,8 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-export default async function ApplicationsPage({ searchParams }: { searchParams: { q?: string, status?: string } }) {
+export default async function ApplicationsPage(props: { searchParams: Promise<{ q?: string, status?: string }> }) {
+  const searchParams = await props.searchParams;
   const session = await getServerSession(authOptions);
   if (!session) redirect('/login');
 
