@@ -176,7 +176,10 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
 
                             {/* Actions */}
                             <div className="flex flex-row md:flex-col gap-2 justify-center border-t md:border-t-0 md:border-l pt-4 md:pt-0 md:pl-6 min-w-[180px]">
-                                <form action={updateStatus.bind(null, app.id, 'contacted')}>
+                                <form action={async () => {
+                                    'use server';
+                                    await updateStatus(app.id, 'contacted');
+                                }}>
                                     <button 
                                         type="submit"
                                         disabled={app.status === 'contacted'}
@@ -187,7 +190,10 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
                                     </button>
                                 </form>
 
-                                <form action={updateStatus.bind(null, app.id, 'approved')}>
+                                <form action={async () => {
+                                    'use server';
+                                    await updateStatus(app.id, 'approved');
+                                }}>
                                     <button 
                                         type="submit"
                                         disabled={app.status === 'approved'}
@@ -198,7 +204,10 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
                                     </button>
                                 </form>
 
-                                <form action={updateStatus.bind(null, app.id, 'rejected')}>
+                                <form action={async () => {
+                                    'use server';
+                                    await updateStatus(app.id, 'rejected');
+                                }}>
                                     <button 
                                         type="submit"
                                         disabled={app.status === 'rejected'}
