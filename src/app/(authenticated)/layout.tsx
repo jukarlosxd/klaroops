@@ -26,10 +26,14 @@ export default async function AuthenticatedLayout({
   // Badge Logic (Admin Only)
   let newAppsCount = 0;
   if (isAdmin) {
-      const apps = await getAmbassadorApplications();
-      // Safe check to prevent layout crash
-      if (Array.isArray(apps)) {
-          newAppsCount = apps.filter(a => a.status === 'new').length;
+      try {
+          const apps = await getAmbassadorApplications();
+          // Safe check to prevent layout crash
+          if (Array.isArray(apps)) {
+              newAppsCount = apps.filter(a => a.status === 'new').length;
+          }
+      } catch (e) {
+          console.error("Failed to load applications for badge", e);
       }
   }
 
