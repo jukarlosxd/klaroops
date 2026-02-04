@@ -368,9 +368,23 @@ function getNested(obj: any, path: string) {
 
 export default function Home() {
     const [view, setView] = useState('home');
-    const [lang, setLang] = useState('es');
+    const [lang, setLang] = useState('en'); // Default to English
     const [country, setCountry] = useState('US');
     const router = useRouter();
+
+    // Load language preference
+    useEffect(() => {
+        const savedLang = localStorage.getItem('klaroops_lang');
+        if (savedLang && (savedLang === 'en' || savedLang === 'es')) {
+            setLang(savedLang);
+        }
+    }, []);
+
+    // Save language preference
+    const handleSetLang = (newLang: string) => {
+        setLang(newLang);
+        localStorage.setItem('klaroops_lang', newLang);
+    };
 
     // Login State
     const [email, setEmail] = useState('');
@@ -389,7 +403,11 @@ export default function Home() {
     const handleSetCountry = (code: string) => {
         if (!PRICING_BY_COUNTRY[code]) return;
         setCountry(code);
-        setLang(PRICING_BY_COUNTRY[code].lang);
+        // Only switch language if not manually overridden by user preference
+        // Or we can just let the country button switch language too, but updating localStorage
+        const newLang = PRICING_BY_COUNTRY[code].lang;
+        setLang(newLang);
+        localStorage.setItem('klaroops_lang', newLang);
     };
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -426,13 +444,22 @@ export default function Home() {
                             KlaroOps
                         </div>
                         <div className="flex items-center space-x-6">
-                            <button 
-                                onClick={() => setLang(lang === 'es' ? 'en' : 'es')} 
-                                className="flex items-center space-x-1 text-sm font-medium text-gray-600 hover:text-gray-900 focus:outline-none"
-                            >
-                                <Globe className="w-4 h-4" />
-                                <span>{lang.toUpperCase()}</span>
-                            </button>
+                            {/* Language Selector */}
+                            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+                                <button 
+                                    onClick={() => handleSetLang('en')}
+                                    className={`px-3 py-1.5 rounded-md text-sm font-bold transition ${lang === 'en' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                                >
+                                    EN
+                                </button>
+                                <button 
+                                    onClick={() => handleSetLang('es')}
+                                    className={`px-3 py-1.5 rounded-md text-sm font-bold transition ${lang === 'es' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
+                                >
+                                    ES
+                                </button>
+                            </div>
+                            
                             <button 
                                 onClick={() => switchView('login')} 
                                 className="text-sm font-medium text-blue-600 hover:text-blue-800"
