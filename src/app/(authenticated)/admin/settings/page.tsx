@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Database, Save, Download } from 'lucide-react';
-import { seedData } from '@/lib/admin-db'; // This won't work directly in client component, needs server action. But for now I'll mock the button to call an API.
+// import { seedData } from '@/lib/admin-db'; // Removed direct import to avoid server/client conflict
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
