@@ -1,10 +1,10 @@
-import { getAdminStats } from '@/lib/ambassador-db';
+import { getAdminStats } from '@/lib/admin-db';
 import { Users, DollarSign, Target, TrendingUp, AlertCircle, Briefcase } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
-export default function AdminDashboardPage() {
-  const stats = getAdminStats();
+export default async function AdminDashboardPage() {
+  const stats = await getAdminStats();
 
   return (
     <div>

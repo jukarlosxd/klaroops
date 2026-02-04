@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 
-export type Role = 'admin' | 'ambassador';
+export type Role = 'admin' | 'ambassador' | 'client_user';
 export type AmbassadorStatus = 'active' | 'inactive';
 export type ClientStatus = 'active' | 'paused' | 'cancelled';
 export type CommissionStatus = 'pending' | 'paid' | 'reversed';
@@ -112,7 +112,8 @@ export interface Appointment {
   start_at: string;
   end_at: string;
   status: AppointmentStatus;
-  notes?:export type Role = 'admin' | 'ambassador' | 'client_user';
+  notes?: string;
+}
 
 export interface ClientUser {
   id: string;

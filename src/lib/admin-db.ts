@@ -660,8 +660,22 @@ export const seedData = async () => {
     ],
     dashboard_projects: [],
     ai_threads: [],
-    ai_messages: []
+    ai_messages: [],
+    client_users: []
   };
   writeDB(db);
   return true;
+};
+
+// --- Stats ---
+
+export const getAdminStats = async () => {
+  const db = readDB();
+  return {
+    totalAmbassadors: db.ambassadors.filter(a => a.status === 'active').length,
+    totalClients: db.clients.filter(c => c.status === 'active').length,
+    leadsThisMonth: 0, // Placeholder
+    pendingCommissions: db.commissions.filter(c => c.status === 'pending').reduce((s, c) => s + (c.amount_cents / 100), 0),
+    paidCommissions: db.commissions.filter(c => c.status === 'paid').reduce((s, c) => s + (c.amount_cents / 100), 0),
+  };
 };
