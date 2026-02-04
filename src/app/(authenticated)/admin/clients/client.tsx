@@ -28,9 +28,11 @@ export default function ClientsClient({ clients, ambassadors }: ClientsClientPro
   const [showCreateWizard, setShowCreateWizard] = useState(false);
 
   // Map for quick lookup
-  const ambMap = new Map(ambassadors.map(a => [a.id, a]));
+  const safeAmbassadors = Array.isArray(ambassadors) ? ambassadors : [];
+  const ambMap = new Map(safeAmbassadors.map(a => [a.id, a]));
 
-  const filteredClients = clients.filter(c => 
+  const safeClients = Array.isArray(clients) ? clients : [];
+  const filteredClients = safeClients.filter(c => 
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (c.legal_name && c.legal_name.toLowerCase().includes(searchTerm.toLowerCase()))
   );

@@ -15,7 +15,10 @@ export default function AmbassadorsClient({ ambassadors }: any) {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [createdCredentials, setCreatedCredentials] = useState<{email: string, password: string} | null>(null);
 
-  const filteredAmbassadors = (ambassadors || []).filter((amb: any) => 
+  // Safely handle potentially undefined ambassadors
+  const safeAmbassadors = Array.isArray(ambassadors) ? ambassadors : [];
+
+  const filteredAmbassadors = safeAmbassadors.filter((amb: any) => 
     amb.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     amb.email.toLowerCase().includes(searchTerm.toLowerCase())
   );

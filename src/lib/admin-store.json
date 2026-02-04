@@ -56,6 +56,16 @@
   ],
   "audit_logs": [
     {
+      "id": "077bcdd4-1941-4291-862a-76b938f93c30",
+      "actor_user_id": "admin_1",
+      "action": "UPDATE_STATUS",
+      "entity_type": "ambassador_application",
+      "entity_id": "06461c8b-d1f5-4d79-84d1-529204a9dfbe",
+      "before_json": "{\"id\":\"06461c8b-d1f5-4d79-84d1-529204a9dfbe\",\"full_name\":\"juan florez\",\"email\":\"jukarlosxdpero2@gmail.com\",\"phone\":\"3855597773\",\"city_state\":\"neiva\",\"message\":\"\\n                                                Experience: no\\n                                                Contacts: idk\\n                                                Why: quiero pene\\n                                            \",\"status\":\"new\",\"ip_address\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.107.1 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36\",\"created_at\":\"2026-02-04T00:14:26.778Z\"}",
+      "after_json": "{\"id\":\"06461c8b-d1f5-4d79-84d1-529204a9dfbe\",\"full_name\":\"juan florez\",\"email\":\"jukarlosxdpero2@gmail.com\",\"phone\":\"3855597773\",\"city_state\":\"neiva\",\"message\":\"\\n                                                Experience: no\\n                                                Contacts: idk\\n                                                Why: quiero pene\\n                                            \",\"status\":\"contacted\",\"ip_address\":\"::1\",\"user_agent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.107.1 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36\",\"created_at\":\"2026-02-04T00:14:26.778Z\",\"updated_at\":\"2026-02-04T00:26:31.110Z\"}",
+      "created_at": "2026-02-04T00:26:31.110Z"
+    },
+    {
       "id": "f1f49a51-9b27-4bcc-bf4c-b9645b61433a",
       "actor_user_id": "jukarlosxd@gmail.com",
       "action": "UPDATE",
@@ -441,10 +451,11 @@
       "phone": "3855597773",
       "city_state": "neiva",
       "message": "\n                                                Experience: no\n                                                Contacts: idk\n                                                Why: quiero pene\n                                            ",
-      "status": "new",
+      "status": "contacted",
       "ip_address": "::1",
       "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Trae/1.107.1 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
-      "created_at": "2026-02-04T00:14:26.778Z"
+      "created_at": "2026-02-04T00:14:26.778Z",
+      "updated_at": "2026-02-04T00:26:31.110Z"
     }
   ]
 }
