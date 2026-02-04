@@ -231,7 +231,8 @@ export default function ClientDetailClient({
         if (!res.ok) throw new Error(await res.text());
         
         alert('Client deleted successfully');
-        router.push('/admin/clients');
+        // Use window.location to force a full reload and avoid router cache issues
+        window.location.href = '/admin/clients';
         
     } catch (error: any) {
         console.error(error);
