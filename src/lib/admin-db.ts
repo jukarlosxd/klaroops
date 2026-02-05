@@ -675,8 +675,84 @@ export const updateSystemConfig = async (data: Partial<import('@/types/admin').S
   }
 };
 
-// AI Threads stubs (to avoid breaking)
-export const getAIThreads = async (clientId: string) => { return []; };
-export const createAIThread = async (clientId: string, title: string, actorId: string) => { return { id: 'temp' } as any; };
-export const getAIMessages = async (threadId: string) => { return []; };
-export const addAIMessage = async (threadId: string, role: any, content: string) => { return { id: 'temp' } as any; };
+// --- AI Chat ---
+
+export const getAIThreads = async (clientId: string) => {
+  const { data, error } = await supabase
+    .from('ai_threads')
+    .select('*')
+    .eq('client_id', clientId)
+    .order('updated_at', { ascending: false });
+    
+  if (error) return [];
+  return data as AIThread[];
+};
+
+export const createAIThread = async (clientId: string, title: string, actorId: string) => {
+  const { data, error } = await supabase
+    .from('ai_threads')
+    .insert({
+      client_id: clientId,
+      title: title
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data as AIThread;
+};
+
+export const getAIMessages = async (threadId: string) => {
+  const { data, error } = await supabase
+    .from('ai_messages')
+    .select('*')
+    .eq('thread_id', threadId)
+    .order('created_at', { ascending: true });
+    
+  if (error) return [];
+  return data as AIMessage[];
+};
+
+export const addAIMessage = async (threadId: string, role: 'user' | 'assistant' | 'system', content: string) => {
+  const { data, error } = await supabase
+    .from('ai_messages')
+    .insert({
+      thread_id: threadId,
+      role,
+      content
+    })
+    .select()
+    .single();
+    
+  if (error) throw new Error(error.message);
+  
+  // Update thread timestamp
+  await supabase.from('ai_threads').update({ updated_at: new Date().toISOString() }).eq('id', threadId);
+  
+  return data as AIMessage;
+};
+
+export const getClientContextForAI = async (clientId: string) => {
+  // 1. Basic Client Info
+  const client = await getClientById(clientId);
+  if (!client) return null;
+
+  // 2. Dashboard Data (if any)
+  const dashboard = await getDashboardProject(clientId);
+
+  // 3. Commissions (Recent)
+  const { data: commissions } = await supabase
+    .from('commissions')
+    .select('*')
+    .eq('client_id', clientId)
+    .limit(10);
+
+  return {
+    client_name: client.name,
+    industry: client.industry,
+    contract_value: client.contract_value_cents,
+    status: client.status,
+    dashboard_kpis: dashboard?.kpi_rules_json || '{}',
+    recent_commissions: commissions || []
+  };
+};

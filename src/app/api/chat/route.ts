@@ -1,62 +1,98 @@
-import OpenAI from 'openai';
-import { NextResponse } from 'next/server';
-import { getClientEvents } from '@/lib/db';
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { 
+  createAIThread, 
+  addAIMessage, 
+  getAIMessages, 
+  getClientContextForAI, 
+  getClientByUserId 
+} from '@/lib/admin-db';
+import { groq, GROQ_MODELS } from '@/lib/groq';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   try {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({
-        message: {
-          role: 'assistant',
-          content: 'OpenAI API Key is missing. Please configure it in the settings or environment variables.'
-        }
-      });
+    const { message, clientId, threadId: existingThreadId } = await req.json();
+
+    // 1. Validate Access
+    // If user is admin, allow any clientId. If user is client_user, ensure they own the client.
+    let verifiedClientId = clientId;
+    const userRole = (session.user as any).role;
+    const userId = (session.user as any).id;
+
+    if (userRole === 'client_user') {
+       const userClient = await getClientByUserId(userId);
+       if (!userClient || userClient.id !== clientId) {
+           return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+       }
+       verifiedClientId = userClient.id;
+    } else if (userRole !== 'admin') {
+       // Ambassadors? Maybe, but for now let's restrict to Admin/Client
+       return NextResponse.json({ error: 'Forbidden role' }, { status: 403 });
     }
 
-    const openai = new OpenAI({
-      apiKey: apiKey,
+    if (!verifiedClientId) return NextResponse.json({ error: 'Client ID required' }, { status: 400 });
+
+    // 2. Manage Thread
+    let threadId = existingThreadId;
+    if (!threadId) {
+       const newThread = await createAIThread(verifiedClientId, message.substring(0, 30) + '...', userId);
+       threadId = newThread.id;
+    }
+
+    // 3. Save User Message
+    await addAIMessage(threadId, 'user', message);
+
+    // 4. Fetch Context
+    const contextData = await getClientContextForAI(verifiedClientId);
+    const contextString = JSON.stringify(contextData, null, 2);
+
+    // 5. Fetch History (Last 10 messages)
+    const history = await getAIMessages(threadId);
+    const historyMessages = history.map(msg => ({
+        role: msg.role as 'user' | 'assistant' | 'system',
+        content: msg.content
+    }));
+
+    // 6. Call Groq
+    const systemPrompt = `You are an expert Operations Analyst for Klaroops.
+    You are analyzing data for client: ${contextData?.client_name}.
+    
+    Current Data Context:
+    ${contextString}
+    
+    Rules:
+    - Answer strictly based on the provided context.
+    - If data is missing, say "I don't have that data currently."
+    - Be professional, concise, and helpful.
+    - Do not make up numbers.
+    `;
+
+    const completion = await groq.chat.completions.create({
+        messages: [
+            { role: 'system', content: systemPrompt },
+            ...historyMessages
+        ],
+        model: GROQ_MODELS.FAST,
+        temperature: 0.5,
+        max_tokens: 500,
     });
 
-    const { messages, clientId, tenantId } = await req.json();
+    const aiResponse = completion.choices[0]?.message?.content || "I couldn't generate a response.";
 
-    // Get context
-    const events = getClientEvents(tenantId, clientId);
-    const recentEvents = events.slice(-10); // Get last 10 events for context
+    // 7. Save AI Response
+    await addAIMessage(threadId, 'assistant', aiResponse);
 
-    // Construct system message
-    const systemMessage = {
-      role: 'system',
-      content: `You are KlaroOps AI, a metrics interpreter for an operations dashboard.
-
-      CORE RULES:
-      - You NEVER read raw rows directly (you only see aggregated metrics).
-      - You ONLY explain what is visible in the dashboard based on the provided metrics.
-      - Your goal is to summarize, prioritize, and rephrase insights.
-      - If you don't have enough data, say so.
-      - Be concise, professional, and "boring" (internal tool style).
-
-      RECENT EVENTS (for context):
-      ${JSON.stringify(recentEvents, null, 2)}
-
-      DASHBOARD STRUCTURE:
-      - Availability % (Today)
-      - Downtime Count (Incidents Today)
-      - Broken Assets Count
-      - Top Problem Areas (Last 7 days)
-      - 7-Day Trend
-      `
-    };
-
-    // @ts-ignore
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
-      messages: [systemMessage, ...messages],
+    return NextResponse.json({ 
+        response: aiResponse, 
+        threadId: threadId 
     });
 
-    return NextResponse.json({ message: completion.choices[0].message });
-  } catch (error) {
-    console.error('Chat error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  } catch (e: any) {
+    console.error('Chat API Error:', e);
+    return NextResponse.json({ error: e.message || 'Internal Server Error' }, { status: 500 });
   }
 }
