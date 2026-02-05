@@ -4,16 +4,11 @@ import GoogleProvider from "next-auth/providers/google";
 import bcrypt from 'bcryptjs';
 import { getUserByEmail, getAmbassadorByUserId, getClientByUserId } from "@/lib/admin-db";
 
-// Hardcoded secrets to bypass GitHub Push Protection and Vercel Config requirements
-// We split the strings to avoid static analysis detection
-const G_CLIENT_ID = "461982131221-2u69f5e8gl5fcnvtdpfp19hsu9nncoj4.apps.googleusercontent.com";
-const G_CLIENT_SECRET = "GOCSPX-" + "8ofrfReKIaDvnaEtkAIa0jvSoM1O";
-
 export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || G_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || G_CLIENT_SECRET,
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       authorization: {
         params: {
           prompt: "consent",
@@ -34,48 +29,42 @@ export const authOptions: AuthOptions = {
 
         console.log(`[AUTH] Attempting login for: ${inputEmail}`);
 
-        // 1. Check Super Admin (Hardcoded/Env fallback)
+        // 1. Check Super Admin
         const adminEmail = (process.env.ADMIN_EMAIL || 'jukarlosxd@gmail.com').toLowerCase();
-        // Also allow system@klaroops.com as admin
+        
         if (inputEmail === adminEmail || inputEmail === 'system@klaroops.com') {
-           // ... admin logic ...
-           // For simplicity in this hardcoded version, check password against demo or env
-           const JUAN_HASH = '$2b$10$ZsSozWoYzLc1oylx9RRFaO8XeI9oX6Uy2uez1cVTOyvRqKt2uxRm.'; // Juan2021%
+           // Admin Access
+           // Prefer Environment Variable Hash for production security
+           const envHash = process.env.ADMIN_PASSWORD_HASH;
            
-           let isValid = credentials.password === '123456';
-           
-           if (!isValid) {
-               // Check against Juan2021% hash
-               isValid = await bcrypt.compare(credentials.password, JUAN_HASH);
+           if (envHash) {
+               const isValid = await bcrypt.compare(credentials.password, envHash);
+               if (isValid) return { id: "admin_1", name: "Admin System", email: inputEmail, role: 'admin' };
+           }
+
+           // Fallback for Development ONLY (To be removed in strict production)
+           // If no env hash is set, check against hardcoded dev password or DB
+           if (process.env.NODE_ENV !== 'production' && credentials.password === '123456') {
+               return { id: "admin_1", name: "Dev Admin", email: inputEmail, role: 'admin' };
            }
            
-           if (!isValid && process.env.ADMIN_PASSWORD_HASH) {
-               // Check against Env hash
-               isValid = await bcrypt.compare(credentials.password, process.env.ADMIN_PASSWORD_HASH);
+           // DB Fallback for System User
+           const user = await getUserByEmail(inputEmail);
+           if (user && await bcrypt.compare(credentials.password, user.password_hash)) {
+               return { id: user.id, name: "System Admin", email: user.email, role: 'admin' };
            }
            
-           if (!isValid) {
-             // Fallback to checking DB for system user if password didn't match hardcoded check
-             const user = await getUserByEmail(inputEmail);
-             if (user && await bcrypt.compare(credentials.password, user.password_hash)) {
-                 return { id: user.id, name: "System Admin", email: user.email, role: 'admin' };
-             }
-             return null;
-           }
-           return { id: "admin_1", name: "Admin System", email: inputEmail, role: 'admin' };
+           return null;
         }
         
-        // 2. Check Database Users (Ambassadors)
+        // 2. Check Database Users (Ambassadors/Clients)
         const user = await getUserByEmail(inputEmail);
         if (user) {
             console.log(`[AUTH] User found in DB: ${user.id} (Role: ${user.role})`);
             const isValid = await bcrypt.compare(credentials.password, user.password_hash);
-            if (!isValid) {
-                console.log("[AUTH] Invalid password for DB user");
-                return null;
-            }
+            if (!isValid) return null;
 
-            // Get profile name if available
+            // Get profile name
             let name = "User";
             if (user.role === 'ambassador') {
                 const amb = await getAmbassadorByUserId(user.id);
@@ -86,7 +75,6 @@ export const authOptions: AuthOptions = {
                 else name = 'Client User';
             }
 
-            console.log(`[AUTH] Login successful for ${name}`);
             return { 
                 id: user.id, 
                 name: name, 
@@ -95,7 +83,6 @@ export const authOptions: AuthOptions = {
             };
         }
         
-        console.log("[AUTH] User not found");
         return null;
       }
     })
@@ -110,17 +97,13 @@ export const authOptions: AuthOptions = {
         token.role = (user as any).role || 'user';
         token.id = user.id;
       }
-      // Handle Google Login
       if (account?.provider === 'google') {
-          // Check if user exists in DB, if not, create or assign default role
-          // For now, default Google users to 'ambassador' or 'guest'
           const dbUser = await getUserByEmail(token.email!);
           if (dbUser) {
               token.role = dbUser.role;
               token.id = dbUser.id;
           } else {
-              // Optionally create user here or just give default role
-              token.role = 'ambassador'; // Default role for new Google Sign-ins
+              token.role = 'ambassador'; 
           }
       }
       return token;
@@ -133,7 +116,7 @@ export const authOptions: AuthOptions = {
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET || "supersecretkey123",
+  secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',
   // @ts-ignore
   trustHost: true,

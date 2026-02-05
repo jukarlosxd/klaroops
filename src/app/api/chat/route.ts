@@ -10,9 +10,39 @@ import {
 } from '@/lib/admin-db';
 import { groq, GROQ_MODELS } from '@/lib/groq';
 
+// Simple Rate Limiting Map (In-memory for demo, Redis for production)
+const rateLimitMap = new Map<string, { count: number, lastTime: number }>();
+
+function isRateLimited(userId: string): boolean {
+    const now = Date.now();
+    const windowMs = 60 * 1000; // 1 minute
+    const maxRequests = 10; // 10 messages per minute
+
+    const userRecord = rateLimitMap.get(userId) || { count: 0, lastTime: now };
+    
+    if (now - userRecord.lastTime > windowMs) {
+        // Reset window
+        rateLimitMap.set(userId, { count: 1, lastTime: now });
+        return false;
+    }
+
+    if (userRecord.count >= maxRequests) {
+        return true;
+    }
+
+    userRecord.count++;
+    rateLimitMap.set(userId, userRecord);
+    return false;
+}
+
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const userId = (session.user as any).id;
+  if (isRateLimited(userId)) {
+      return NextResponse.json({ error: 'Too many requests. Please wait a minute.' }, { status: 429 });
+  }
 
   try {
     const { message, clientId, threadId: existingThreadId } = await req.json();
@@ -21,8 +51,7 @@ export async function POST(req: NextRequest) {
     // If user is admin, allow any clientId. If user is client_user, ensure they own the client.
     let verifiedClientId = clientId;
     const userRole = (session.user as any).role;
-    const userId = (session.user as any).id;
-
+    
     if (userRole === 'client_user') {
        const userClient = await getClientByUserId(userId);
        if (!userClient || userClient.id !== clientId) {

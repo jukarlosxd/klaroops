@@ -2,10 +2,53 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { groq, GROQ_MODELS } from '@/lib/groq';
+import { z } from 'zod';
+
+// Zod Schema for Validation
+const DashboardConfigSchema = z.object({
+  kpis: z.array(z.object({
+    id: z.string().optional(),
+    label: z.string(),
+    metric: z.string(),
+    aggregation: z.string()
+  })),
+  charts: z.array(z.object({
+    type: z.string(),
+    title: z.string(),
+    x: z.string(),
+    y: z.string(),
+    aggregation: z.string().optional(),
+    groupBy: z.string().optional()
+  })),
+  notes: z.array(z.string()).optional()
+});
+
+// Simple Rate Limiting (In-memory)
+const rateLimitMap = new Map<string, { count: number, lastTime: number }>();
+function isRateLimited(userId: string): boolean {
+    const now = Date.now();
+    const windowMs = 60 * 60 * 1000; // 1 hour
+    const maxRequests = 5; // 5 generations per hour (expensive operation)
+
+    const userRecord = rateLimitMap.get(userId) || { count: 0, lastTime: now };
+    if (now - userRecord.lastTime > windowMs) {
+        rateLimitMap.set(userId, { count: 1, lastTime: now });
+        return false;
+    }
+    if (userRecord.count >= maxRequests) return true;
+    userRecord.count++;
+    rateLimitMap.set(userId, userRecord);
+    return false;
+}
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const userId = (session.user as any).id;
+  if (isRateLimited(userId)) {
+      return NextResponse.json({ error: 'Rate limit exceeded. Try again in an hour.' }, { status: 429 });
+  }
 
   try {
     const { columns, sampleData, metadata } = await req.json();
@@ -74,9 +117,12 @@ export async function POST(req: NextRequest) {
     let result;
     try {
         result = JSON.parse(content);
+        // Validate with Zod
+        DashboardConfigSchema.parse(result);
     } catch (e) {
-        console.error('JSON Parse Error:', e);
-        return NextResponse.json({ error: 'Failed to generate valid JSON configuration' }, { status: 500 });
+        console.error('JSON Parse/Validation Error:', e);
+        // Fallback or specific error handling
+        return NextResponse.json({ error: 'Generated configuration invalid' }, { status: 500 });
     }
 
     return NextResponse.json(result);
