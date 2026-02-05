@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, Calendar, LogOut, Shield, Users, Briefcase, Settings, Inbox } from "lucide-react";
 import { authOptions } from '@/lib/auth';
-import { getAmbassadorApplications } from '@/lib/admin-db'; // For Badge
+import { getAmbassadorApplications, getClientByUserId } from '@/lib/admin-db'; // For Badge & Chat
+import ChatWidget from "@/components/ChatWidget";
 
 import SignOutButton from "@/components/SignOutButton";
 
@@ -34,6 +35,16 @@ export default async function AuthenticatedLayout({
           }
       } catch (e) {
           console.error("Failed to load applications for badge", e);
+      }
+  }
+
+  // Chat Data (Client Only)
+  let clientData = null;
+  if (isClient) {
+      try {
+          clientData = await getClientByUserId((session.user as any).id);
+      } catch (e) {
+          console.error("Failed to load client data for chat", e);
       }
   }
 
@@ -134,6 +145,11 @@ export default async function AuthenticatedLayout({
       <main className="flex-1 md:ml-64 p-8 overflow-auto min-h-screen">
         {children}
       </main>
+
+      {/* AI Chat Widget (Only for Clients) */}
+      {isClient && clientData && (
+        <ChatWidget clientId={clientData.id} clientName={clientData.name} />
+      )}
     </div>
   );
 }
