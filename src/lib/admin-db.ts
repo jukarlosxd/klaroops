@@ -272,56 +272,97 @@ export const deleteAmbassador = async (id: string, actorId: string) => {
   return true;
 };
 
+import { supabase } from '@/lib/supabase';
+
 export const createAmbassadorApplication = async (data: Omit<AmbassadorApplication, 'id' | 'created_at' | 'status'>, ip: string, userAgent: string) => {
-  const db = readDB();
-  const newApp: AmbassadorApplication = {
-    id: uuidv4(),
-    ...data,
-    status: 'new',
-    ip_address: ip,
-    user_agent: userAgent,
-    created_at: new Date().toISOString()
-  };
-  db.ambassador_applications.unshift(newApp);
-  writeDB(db);
-  return newApp;
+  // Supabase Implementation
+  const { data: newApp, error } = await supabase
+    .from('ambassador_applications')
+    .insert({
+      full_name: data.full_name,
+      email: data.email,
+      phone: data.phone,
+      city_state: data.city_state,
+      message: data.message,
+      status: 'new',
+      ip_address: ip,
+      user_agent: userAgent,
+      notes_internal: data.notes_internal
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Supabase Create Application Error:', error);
+    throw new Error(error.message);
+  }
+  
+  return newApp as AmbassadorApplication;
 };
 
 export const getAmbassadorApplications = async () => {
-  const db = readDB();
-  return db.ambassador_applications;
+  // Supabase Implementation
+  const { data, error } = await supabase
+    .from('ambassador_applications')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Supabase Get Applications Error:', error);
+    return [];
+  }
+
+  return data as AmbassadorApplication[];
 };
 
 export const updateAmbassadorApplicationStatus = async (id: string, status: AmbassadorApplication['status'], actorId: string, notes?: string) => {
-  const db = readDB();
-  const index = db.ambassador_applications.findIndex(a => a.id === id);
-  if (index === -1) return null;
-
-  const oldData = { ...db.ambassador_applications[index] };
-  const newData = { 
-      ...oldData, 
-      status, 
-      notes_internal: notes ?? oldData.notes_internal,
-      updated_at: new Date().toISOString() 
+  // Supabase Implementation
+  const updates: any = { 
+    status, 
+    updated_at: new Date().toISOString() 
   };
-  
-  db.ambassador_applications[index] = newData;
-  logAudit(db, actorId, 'UPDATE_STATUS', 'ambassador_application', id, oldData, newData);
-  writeDB(db);
-  return newData;
+  if (notes !== undefined) {
+    updates.notes_internal = notes;
+  }
+
+  const { data, error } = await supabase
+    .from('ambassador_applications')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Supabase Update Application Error:', error);
+    return null;
+  }
+
+  return data as AmbassadorApplication;
 };
 
 export const getAmbassadorApplicationStats = async () => {
-  const db = readDB();
-  const apps = db.ambassador_applications;
-  const now = new Date();
+  // Supabase Implementation - Hybrid Approach (Fetch recent to compute stats)
+  // For scalability, this should be a stored procedure or multiple count queries, 
+  // but for MVP, fetching last 30 days is fine.
   
+  const now = new Date();
+  const prevWeekStart = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString();
+
+  const { data: apps, error } = await supabase
+    .from('ambassador_applications')
+    .select('id, status, created_at')
+    .gte('created_at', prevWeekStart); // Optimization: only fetch needed rows
+
+  if (error || !apps) {
+      console.error('Stats Error:', error);
+      return null;
+  }
+
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
   const yesterdayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).toISOString();
   const yesterdayEnd = todayStart;
   
   const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const prevWeekStart = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString();
   
   const newToday = apps.filter(a => a.created_at >= todayStart && a.status === 'new').length;
   const newYesterday = apps.filter(a => a.created_at >= yesterdayStart && a.created_at < yesterdayEnd && a.status === 'new').length;
@@ -334,6 +375,12 @@ export const getAmbassadorApplicationStats = async () => {
   const deltaWeekly = totalLast7Days - totalPrev7Days;
   const deltaWeeklyPercent = totalPrev7Days === 0 ? 100 : Math.round(((totalLast7Days - totalPrev7Days) / totalPrev7Days) * 100);
 
+  // Total New (All time) requires a separate count query
+  const { count: totalNew } = await supabase
+    .from('ambassador_applications')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'new');
+
   return {
       newToday,
       newYesterday,
@@ -341,7 +388,7 @@ export const getAmbassadorApplicationStats = async () => {
       deltaToday,
       deltaWeekly,
       deltaWeeklyPercent,
-      totalNew: apps.filter(a => a.status === 'new').length
+      totalNew: totalNew || 0
   };
 };
 
