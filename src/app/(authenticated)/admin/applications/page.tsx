@@ -21,6 +21,8 @@ import {
 
 export const dynamic = 'force-dynamic';
 
+import { Zap, Sparkles, AlertCircle } from 'lucide-react';
+
 export default async function ApplicationsPage(props: { searchParams: Promise<{ q?: string, status?: string }> }) {
   const searchParams = await props.searchParams;
   const session = await getServerSession(authOptions);
@@ -68,6 +70,26 @@ export default async function ApplicationsPage(props: { searchParams: Promise<{ 
     if (!session) return;
     await updateAmbassadorApplicationStatus(id, status, (session.user as any).id);
     revalidatePath('/admin/applications');
+  }
+
+  async function runAiScoring(id: string) {
+    'use server';
+    const session = await getServerSession(authOptions);
+    if (!session) return;
+    
+    // Call the API route internally or logic directly. 
+    // Since we are in server component/action, we can just fetch our own API 
+    // BUT fetching localhost in server action can be tricky in Vercel.
+    // Better to invoke logic or fetch absolute URL. 
+    // For simplicity/reliability, we'll fetch the API client-side usually, 
+    // but here we requested server-side action. 
+    // Let's use a simple fetch to the relative path which might fail in server action context without full URL.
+    // Hack: We'll assume the client calls a client-side function, BUT user asked for server changes mainly.
+    // Let's rely on a Client Component for the button to call the API, OR use a hack here.
+    
+    // Actually, the cleanest way in App Router is a Server Action that calls the logic directly,
+    // but we created a route handler. Let's make the button a Client Component or a form that triggers this.
+    // I will use a Client Component for the "AI Score" button to avoid URL issues.
   }
 
   return (
@@ -156,6 +178,16 @@ export default async function ApplicationsPage(props: { searchParams: Promise<{ 
                                 <div className="flex items-center gap-3 mb-2">
                                     <h3 className="text-xl font-bold text-gray-900">{app.full_name}</h3>
                                     <StatusBadge status={app.status} />
+                                    {app.ai_score !== undefined && (
+                                        <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold border ${
+                                            app.ai_tier === 'hot' ? 'bg-red-50 text-red-600 border-red-100' :
+                                            app.ai_tier === 'warm' ? 'bg-orange-50 text-orange-600 border-orange-100' :
+                                            'bg-blue-50 text-blue-600 border-blue-100'
+                                        }`}>
+                                            <Sparkles size={12} />
+                                            Score: {app.ai_score} ({app.ai_tier?.toUpperCase()})
+                                        </div>
+                                    )}
                                 </div>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-8 text-sm text-gray-600 mb-4">
@@ -179,6 +211,27 @@ export default async function ApplicationsPage(props: { searchParams: Promise<{ 
 
                                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 relative group">
                                     <p className="text-gray-800 whitespace-pre-wrap text-sm">{app.message}</p>
+                                    
+                                    {/* AI Insights Box */}
+                                    {app.ai_reasons && (
+                                        <div className="mt-4 pt-3 border-t border-gray-200">
+                                            <div className="flex items-center gap-2 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                                <Zap size={12} /> AI Analysis
+                                            </div>
+                                            <ul className="text-xs text-gray-600 space-y-1 list-disc pl-4 mb-3">
+                                                {app.ai_reasons.map((r: string, i: number) => (
+                                                    <li key={i}>{r}</li>
+                                                ))}
+                                            </ul>
+                                            {app.ai_suggested_message && (
+                                                <div className="bg-white p-2 rounded border border-gray-200 text-xs text-gray-500">
+                                                    <span className="font-bold">Suggested Reply:</span>
+                                                    <div className="mt-1 italic">{app.ai_suggested_message}</div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
                                     {app.notes_internal && (
                                         <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-500">
                                             <span className="font-bold text-gray-700">Internal Note:</span> {app.notes_internal}
@@ -189,6 +242,8 @@ export default async function ApplicationsPage(props: { searchParams: Promise<{ 
 
                             {/* Actions */}
                             <div className="flex flex-row md:flex-col gap-2 justify-center border-t md:border-t-0 md:border-l pt-4 md:pt-0 md:pl-6 min-w-[180px]">
+                                <AiScoreButton id={app.id} hasScore={!!app.ai_score} />
+                                
                                 <form action={async () => {
                                     'use server';
                                     await updateStatus(app.id, 'contacted');
@@ -240,6 +295,9 @@ export default async function ApplicationsPage(props: { searchParams: Promise<{ 
     </div>
   );
 }
+
+// Client Component for Scoring Button to handle interactivity
+import { AiScoreButton } from './ai-button';
 
 function KpiCard({ title, value, subValue, trend, color = 'gray' }: any) {
     const isUp = trend === 'up';

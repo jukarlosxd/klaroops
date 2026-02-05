@@ -135,6 +135,12 @@ export interface AmbassadorApplication {
   notes_internal?: string;
   updated_at?: string;
   created_at: string;
+  // AI Scoring
+  ai_score?: number;
+  ai_tier?: 'hot' | 'warm' | 'cold';
+  ai_reasons?: string[]; // JSON array in DB
+  ai_suggested_message?: string;
+  ai_updated_at?: string;
 }
 
 export interface SystemConfig {
