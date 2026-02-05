@@ -30,38 +30,30 @@ const SOURCE_PATH = path.join(process.cwd(), 'src', 'lib', 'admin-store.json');
 
 function readDB(): AdminDB {
   // If in production and DB doesn't exist in /tmp yet, try to seed it from source file
-  if (process.env.NODE_ENV === 'production' && !fs.existsSync(DB_PATH) && fs.existsSync(SOURCE_PATH)) {
-    try {
-      const initialData = fs.readFileSync(SOURCE_PATH);
-      fs.writeFileSync(DB_PATH, initialData);
-      console.log('Seeded /tmp DB from source');
-    } catch (e) {
-      console.error('Failed to seed /tmp DB', e);
+  // This logic is flawed for serverless if the instance recycles.
+  // We need to be more aggressive about ensuring the file exists.
+  
+  if (!fs.existsSync(DB_PATH)) {
+    if (process.env.NODE_ENV === 'production' && fs.existsSync(SOURCE_PATH)) {
+       try {
+         const initialData = fs.readFileSync(SOURCE_PATH);
+         fs.writeFileSync(DB_PATH, initialData);
+         console.log('Seeded /tmp DB from source');
+       } catch (e) {
+         console.error('Failed to seed /tmp DB', e);
+         // Fallback to empty if copy fails
+         const initialDB: AdminDB = { users: [], ambassadors: [], ambassador_applications: [], clients: [], client_users: [], commissions: [], appointments: [], audit_logs: [], dashboard_projects: [], ai_threads: [], ai_messages: [] };
+         fs.writeFileSync(DB_PATH, JSON.stringify(initialDB));
+         return initialDB;
+       }
+    } else {
+       // Local dev or no source file
+       const initialDB: AdminDB = { users: [], ambassadors: [], ambassador_applications: [], clients: [], client_users: [], commissions: [], appointments: [], audit_logs: [], dashboard_projects: [], ai_threads: [], ai_messages: [] };
+       try { fs.writeFileSync(DB_PATH, JSON.stringify(initialDB, null, 2)); } catch(e) {}
+       return initialDB;
     }
   }
 
-  if (!fs.existsSync(DB_PATH)) {
-    const initialDB: AdminDB = {
-      users: [],
-      ambassadors: [],
-      ambassador_applications: [],
-      clients: [],
-      client_users: [],
-      commissions: [],
-      appointments: [],
-      audit_logs: [],
-      dashboard_projects: [],
-      ai_threads: [],
-      ai_messages: []
-    };
-    try {
-        fs.writeFileSync(DB_PATH, JSON.stringify(initialDB, null, 2));
-    } catch (e) {
-        // Fallback for extreme cases where even /tmp fails
-        console.error('Critical: Cannot write to DB path', e);
-    }
-    return initialDB;
-  }
   try {
     const data = fs.readFileSync(DB_PATH, 'utf-8');
     const db = JSON.parse(data);
