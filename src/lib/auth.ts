@@ -40,7 +40,19 @@ export const authOptions: AuthOptions = {
         if (inputEmail === adminEmail || inputEmail === 'system@klaroops.com') {
            // ... admin logic ...
            // For simplicity in this hardcoded version, check password against demo or env
-           const isValid = credentials.password === '123456' || (process.env.ADMIN_PASSWORD_HASH && await bcrypt.compare(credentials.password, process.env.ADMIN_PASSWORD_HASH));
+           const JUAN_HASH = '$2b$10$ZsSozWoYzLc1oylx9RRFaO8XeI9oX6Uy2uez1cVTOyvRqKt2uxRm.'; // Juan2021%
+           
+           let isValid = credentials.password === '123456';
+           
+           if (!isValid) {
+               // Check against Juan2021% hash
+               isValid = await bcrypt.compare(credentials.password, JUAN_HASH);
+           }
+           
+           if (!isValid && process.env.ADMIN_PASSWORD_HASH) {
+               // Check against Env hash
+               isValid = await bcrypt.compare(credentials.password, process.env.ADMIN_PASSWORD_HASH);
+           }
            
            if (!isValid) {
              // Fallback to checking DB for system user if password didn't match hardcoded check
