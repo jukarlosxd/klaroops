@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { getAuthenticatedClient } from '@/lib/google';
+import { getGoogleAccessToken, getOAuth2Client } from '@/lib/google-auth';
 import { google } from 'googleapis';
 
 export async function POST(req: Request) {
@@ -11,12 +11,21 @@ export async function POST(req: Request) {
   try {
     const { sheet_id, tab, header_row = 1 } = await req.json();
 
+    console.log(`[SheetScan] Starting scan for Sheet ID: ${sheet_id} (Tab: ${tab || 'Default'})`);
+
     if (!sheet_id) {
       return NextResponse.json({ error: 'sheet_id is required' }, { status: 400 });
     }
 
-    const auth = await getAuthenticatedClient();
-    const sheets = google.sheets({ version: 'v4', auth });
+    // 1. Get Token from Central Auth (system@klaroops.com)
+    // This handles refresh automatically via supabaseAdmin
+    const accessToken = await getGoogleAccessToken();
+    
+    // 2. Create Auth Client
+    const auth = getOAuth2Client();
+    auth.setCredentials({ access_token: accessToken });
+
+    const sheets = google.sheets({ version: 'v4', auth: auth as any });
 
     // Read headers and first 20 rows of data
     // Assuming header_row is 1-based index
@@ -25,6 +34,8 @@ export async function POST(req: Request) {
     
     // Read Headers
     const headerRange = tab ? `${tab}!${header_row}:${header_row}` : `${header_row}:${header_row}`;
+    console.log(`[SheetScan] Fetching headers from: ${headerRange}`);
+    
     const headerRes = await sheets.spreadsheets.values.get({
       spreadsheetId: sheet_id,
       range: headerRange,
@@ -36,6 +47,8 @@ export async function POST(req: Request) {
       ? `${tab}!${dataStartRow}:${dataStartRow + limit}` 
       : `${dataStartRow}:${dataStartRow + limit}`;
       
+    console.log(`[SheetScan] Fetching data from: ${dataRange}`);
+
     const dataRes = await sheets.spreadsheets.values.get({
       spreadsheetId: sheet_id,
       range: dataRange,
@@ -61,6 +74,8 @@ export async function POST(req: Request) {
       };
     });
 
+    console.log(`[SheetScan] Success. Found ${headers.length} columns and ${rows.length} preview rows.`);
+
     return NextResponse.json({
       ok: true,
       headers,
@@ -69,10 +84,29 @@ export async function POST(req: Request) {
     });
 
   } catch (error: any) {
-    console.error('Sheet Scan Error:', error);
+    console.error('[SheetScan] Error:', error?.response?.data || error.message);
+    
+    // Detect specific Google API errors
+    const status = error?.code || 500;
+    const message = error?.message || 'Internal Server Error';
+
+    if (status === 403 || message.includes('permission')) {
+        return NextResponse.json({ 
+            ok: false, 
+            error: `Permission denied. Please share the sheet with system@klaroops.com (or the connected email).` 
+        }, { status: 403 });
+    }
+
+    if (status === 404) {
+        return NextResponse.json({ 
+            ok: false, 
+            error: `Spreadsheet not found. Check ID.` 
+        }, { status: 404 });
+    }
+
     return NextResponse.json({ 
       ok: false, 
-      error: error.message 
-    }, { status: 500 });
+      error: message 
+    }, { status: status });
   }
 }
