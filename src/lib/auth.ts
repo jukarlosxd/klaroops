@@ -4,6 +4,16 @@ import GoogleProvider from "next-auth/providers/google";
 import bcrypt from 'bcryptjs';
 import { getUserByEmail, getAmbassadorByUserId, getClientByUserId } from "@/lib/admin-db";
 
+// --- DIAGNOSTIC LOGS (REMOVE AFTER FIXING) ---
+console.log("=== NEXTAUTH CONFIG DIAGNOSIS ===");
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("NEXTAUTH_URL exists:", !!process.env.NEXTAUTH_URL);
+if (process.env.NEXTAUTH_URL) console.log("NEXTAUTH_URL value:", process.env.NEXTAUTH_URL);
+console.log("NEXTAUTH_SECRET exists:", !!process.env.NEXTAUTH_SECRET);
+console.log("GOOGLE_CLIENT_ID exists:", !!process.env.GOOGLE_CLIENT_ID);
+console.log("GOOGLE_CLIENT_SECRET exists:", !!process.env.GOOGLE_CLIENT_SECRET);
+console.log("=================================");
+
 const providers = [];
 
 // Only add Google Provider if keys are present to avoid Configuration Error
@@ -21,6 +31,8 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             }
         })
     );
+} else {
+    console.warn("WARNING: Google Provider NOT initialized. Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET.");
 }
 
 providers.push(
@@ -129,9 +141,9 @@ export const authOptions: AuthOptions = {
     },
   },
   secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-dev-only-do-not-use-in-prod',
-  debug: process.env.NODE_ENV === 'development',
+  debug: true, // FORCE DEBUG IN PROD FOR DIAGNOSIS
   // @ts-ignore
-  trustHost: true,
+  trustHost: true, // Needed for Vercel
   session: {
     strategy: "jwt",
     maxAge: 24 * 60 * 60, // 24 hours
