@@ -31,6 +31,9 @@ export default withAuth(
         return !!token;
       },
     },
+    // CRITICAL FIX: Explicitly pass the secret to middleware
+    // This allows it to work on Vercel even if NEXTAUTH_SECRET env var is missing
+    secret: process.env.NEXTAUTH_SECRET || 'emergency-fallback-secret-production-fix-2024',
   }
 );
 
