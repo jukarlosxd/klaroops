@@ -4,95 +4,101 @@ import GoogleProvider from "next-auth/providers/google";
 import bcrypt from 'bcryptjs';
 import { getUserByEmail, getAmbassadorByUserId, getClientByUserId } from "@/lib/admin-db";
 
-export const authOptions: AuthOptions = {
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      authorization: {
-        params: {
-          prompt: "consent",
-          access_type: "offline",
-          response_type: "code"
-        }
-      }
-    }),
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
-      },
-      async authorize(credentials) {
-        const inputEmail = credentials?.email?.trim().toLowerCase();
-        if (!inputEmail || !credentials?.password) return null;
+const providers = [];
 
-        console.log(`[AUTH] Attempting login for: ${inputEmail}`);
-
-        // 1. Check Super Admin
-        const adminEmail = (process.env.ADMIN_EMAIL || 'jukarlosxd@gmail.com').toLowerCase();
-        
-        if (inputEmail === adminEmail || inputEmail === 'system@klaroops.com') {
-           // Admin Access
-           // Prefer Environment Variable Hash for production security
-           const envHash = process.env.ADMIN_PASSWORD_HASH;
-           
-           if (envHash) {
-               const isValid = await bcrypt.compare(credentials.password, envHash);
-               if (isValid) return { id: "admin_1", name: "Admin System", email: inputEmail, role: 'admin' };
-           }
-
-           // Fallback for Development ONLY (To be removed in strict production)
-           // If no env hash is set, check against hardcoded dev password or DB
-           if (process.env.NODE_ENV !== 'production' && credentials.password === '123456') {
-               return { id: "admin_1", name: "Dev Admin", email: inputEmail, role: 'admin' };
-           }
-           
-           // SPECIFIC USER BYPASS (Requested by user)
-           // Allow legacy admin credentials if env vars fail
-           if (inputEmail === 'jukarlosxd@gmail.com' && credentials.password === 'Juan2021%') {
-              return { id: "admin_master", name: "Master Admin", email: inputEmail, role: 'admin' };
-           }
-
-           // DB Fallback for System User
-           const user = await getUserByEmail(inputEmail);
-           if (user && await bcrypt.compare(credentials.password, user.password_hash)) {
-               return { id: user.id, name: "System Admin", email: user.email, role: 'admin' };
-           }
-           
-           return null;
-        }
-        
-        // 2. Check Database Users (Ambassadors/Clients)
-        const user = await getUserByEmail(inputEmail);
-        if (user) {
-            console.log(`[AUTH] User found in DB: ${user.id} (Role: ${user.role})`);
-            const isValid = await bcrypt.compare(credentials.password, user.password_hash);
-            if (!isValid) return null;
-
-            // Get profile name
-            let name = "User";
-            if (user.role === 'ambassador') {
-                const amb = await getAmbassadorByUserId(user.id);
-                if (amb) name = amb.name;
-            } else if (user.role === 'client_user') {
-                const client = await getClientByUserId(user.id);
-                if (client) name = client.name;
-                else name = 'Client User';
+// Only add Google Provider if keys are present to avoid Configuration Error
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    providers.push(
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            authorization: {
+                params: {
+                    prompt: "consent",
+                    access_type: "offline",
+                    response_type: "code"
+                }
             }
+        })
+    );
+}
 
-            return { 
-                id: user.id, 
-                name: name, 
-                email: user.email, 
-                role: user.role 
-            };
+providers.push(
+    CredentialsProvider({
+        name: "Credentials",
+        credentials: {
+            email: { label: "Email", type: "email" },
+            password: { label: "Password", type: "password" }
+        },
+        async authorize(credentials) {
+            const inputEmail = credentials?.email?.trim().toLowerCase();
+            if (!inputEmail || !credentials?.password) return null;
+
+            console.log(`[AUTH] Attempting login for: ${inputEmail}`);
+
+            // 1. Check Super Admin
+            const adminEmail = (process.env.ADMIN_EMAIL || 'jukarlosxd@gmail.com').toLowerCase();
+            
+            if (inputEmail === adminEmail || inputEmail === 'system@klaroops.com') {
+               // Admin Access
+               const envHash = process.env.ADMIN_PASSWORD_HASH;
+               
+               if (envHash) {
+                   const isValid = await bcrypt.compare(credentials.password, envHash);
+                   if (isValid) return { id: "admin_1", name: "Admin System", email: inputEmail, role: 'admin' };
+               }
+
+               // Fallback for Development
+               if (process.env.NODE_ENV !== 'production' && credentials.password === '123456') {
+                   return { id: "admin_1", name: "Dev Admin", email: inputEmail, role: 'admin' };
+               }
+               
+               // SPECIFIC USER BYPASS
+               if (inputEmail === 'jukarlosxd@gmail.com' && credentials.password === 'Juan2021%') {
+                  return { id: "admin_master", name: "Master Admin", email: inputEmail, role: 'admin' };
+               }
+
+               // DB Fallback
+               const user = await getUserByEmail(inputEmail);
+               if (user && await bcrypt.compare(credentials.password, user.password_hash)) {
+                   return { id: user.id, name: "System Admin", email: user.email, role: 'admin' };
+               }
+               
+               return null;
+            }
+            
+            // 2. Check Database Users
+            const user = await getUserByEmail(inputEmail);
+            if (user) {
+                console.log(`[AUTH] User found in DB: ${user.id} (Role: ${user.role})`);
+                const isValid = await bcrypt.compare(credentials.password, user.password_hash);
+                if (!isValid) return null;
+
+                let name = "User";
+                if (user.role === 'ambassador') {
+                    const amb = await getAmbassadorByUserId(user.id);
+                    if (amb) name = amb.name;
+                } else if (user.role === 'client_user') {
+                    const client = await getClientByUserId(user.id);
+                    if (client) name = client.name;
+                    else name = 'Client User';
+                }
+
+                return { 
+                    id: user.id, 
+                    name: name, 
+                    email: user.email, 
+                    role: user.role 
+                };
+            }
+            
+            return null;
         }
-        
-        return null;
-      }
     })
-  ],
+);
+
+export const authOptions: AuthOptions = {
+  providers: providers,
   pages: {
     signIn: '/?view=login',
     error: '/?view=login&error=InvalidCredentials', 
@@ -122,7 +128,7 @@ export const authOptions: AuthOptions = {
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-dev-only-do-not-use-in-prod',
   debug: process.env.NODE_ENV === 'development',
   // @ts-ignore
   trustHost: true,
