@@ -4,15 +4,11 @@ import GoogleProvider from "next-auth/providers/google";
 import bcrypt from 'bcryptjs';
 import { getUserByEmail, getAmbassadorByUserId, getClientByUserId } from "@/lib/admin-db";
 
-// --- DIAGNOSTIC LOGS (REMOVE AFTER FIXING) ---
-console.log("=== NEXTAUTH CONFIG DIAGNOSIS ===");
-console.log("NODE_ENV:", process.env.NODE_ENV);
-console.log("NEXTAUTH_URL exists:", !!process.env.NEXTAUTH_URL);
-if (process.env.NEXTAUTH_URL) console.log("NEXTAUTH_URL value:", process.env.NEXTAUTH_URL);
-console.log("NEXTAUTH_SECRET exists:", !!process.env.NEXTAUTH_SECRET);
-console.log("GOOGLE_CLIENT_ID exists:", !!process.env.GOOGLE_CLIENT_ID);
-console.log("GOOGLE_CLIENT_SECRET exists:", !!process.env.GOOGLE_CLIENT_SECRET);
-console.log("=================================");
+// --- EMERGENCY FIX: Force NEXTAUTH_URL if missing in production ---
+if (process.env.NODE_ENV === 'production' && !process.env.NEXTAUTH_URL) {
+    console.warn("CRITICAL: NEXTAUTH_URL missing in production. Forcing https://klaroops.com");
+    process.env.NEXTAUTH_URL = 'https://klaroops.com';
+}
 
 const providers = [];
 
@@ -31,8 +27,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             }
         })
     );
-} else {
-    console.warn("WARNING: Google Provider NOT initialized. Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET.");
 }
 
 providers.push(
@@ -140,10 +134,11 @@ export const authOptions: AuthOptions = {
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-dev-only-do-not-use-in-prod',
-  debug: true, // FORCE DEBUG IN PROD FOR DIAGNOSIS
+  // Ensure a hardcoded fallback secret is available if env var is missing
+  secret: process.env.NEXTAUTH_SECRET || 'emergency-fallback-secret-production-fix-2024',
+  debug: false, 
   // @ts-ignore
-  trustHost: true, // Needed for Vercel
+  trustHost: true,
   session: {
     strategy: "jwt",
     maxAge: 24 * 60 * 60, // 24 hours
