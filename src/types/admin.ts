@@ -43,6 +43,14 @@ export interface Client {
   billing_cycle?: 'monthly' | 'weekly' | 'custom';
   onboarding_status?: 'new' | 'onboarding' | 'live' | 'paused';
   
+  // Self-Serve Subscription
+  plan?: 'trial' | 'starter' | 'growth' | 'pro';
+  subscription_status?: 'active' | 'past_due' | 'canceled' | 'trial' | 'expired';
+  trial_ends_at?: string;
+  stripe_customer_id?: string;
+  stripe_subscription_id?: string;
+  subscription_renews_at?: string;
+
   notes_internal?: string;
   created_at: string;
   updated_at?: string;
@@ -55,10 +63,12 @@ export interface DashboardProject {
   template_key: string; // 'manufacturing', 'sales', etc
   data_source_type: 'google_sheets' | 'csv' | 'api' | 'manual';
   data_source_config_json: string;
+  dataset_profile_json?: any;
+  selected_sheets_json?: any; // New field for multi-sheet
   mapping_json: string;
   kpi_rules_json: string;
   chart_config_json?: string;
-  dashboard_status: 'not_started' | 'configuring' | 'ready' | 'error';
+  dashboard_status: 'not_started' | 'configuring' | 'ready' | 'error' | 'draft';
   created_at: string;
   updated_at: string;
 }

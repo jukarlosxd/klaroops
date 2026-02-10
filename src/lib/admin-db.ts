@@ -688,6 +688,25 @@ export const getAIThreads = async (clientId: string) => {
   return data as AIThread[];
 };
 
+export const getClientAIProfile = async (clientId: string) => {
+  const { data } = await supabase
+    .from('client_ai_profiles')
+    .select('*')
+    .eq('client_id', clientId)
+    .single();
+  return data;
+};
+
+export const upsertClientAIProfile = async (clientId: string, data: any) => {
+    const { data: result, error } = await supabase
+        .from('client_ai_profiles')
+        .upsert({ client_id: clientId, ...data, updated_at: new Date().toISOString() })
+        .select()
+        .single();
+    if (error) throw new Error(error.message);
+    return result;
+};
+
 export const createAIThread = async (clientId: string, title: string, actorId: string) => {
   const { data, error } = await supabase
     .from('ai_threads')

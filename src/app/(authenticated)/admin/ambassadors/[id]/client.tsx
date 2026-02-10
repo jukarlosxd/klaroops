@@ -28,7 +28,9 @@ export default function AmbassadorDetailClient({
   commissions = [], 
   appointments = [], 
   auditLogs = [], 
-  allClients = [] 
+  allClients = [],
+  prospects = [], // NEW
+  aiStats = { count: 0, lastActive: null } // NEW
 }: any) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('overview');
@@ -184,9 +186,10 @@ export default function AmbassadorDetailClient({
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: User },
-    { id: 'clients', label: 'Clients', icon: Users },
-    { id: 'commissions', label: 'Commissions', icon: DollarSign },
+    { id: 'prospects', label: 'Prospects (Leads)', icon: Users }, // NEW
+    { id: 'sales', label: 'Closed Sales', icon: DollarSign }, // RENAMED from Clients
     { id: 'appointments', label: 'Appointments', icon: Calendar },
+    { id: 'ai', label: 'AI Stats', icon: RefreshCw }, // NEW
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -294,15 +297,138 @@ export default function AmbassadorDetailClient({
           </div>
         )}
 
-        {activeTab === 'clients' && (
+        {activeTab === 'prospects' && (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-            <div className="flex justify-end">
+             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-4">
+                 <p className="text-sm text-gray-500">
+                    <strong>Read-Only View:</strong> These are the personal leads the ambassador is working on.
+                    You cannot edit them, but you can monitor activity.
+                 </p>
+             </div>
+             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 font-semibold text-gray-700">Prospect Name</th>
+                    <th className="px-6 py-3 font-semibold text-gray-700">Company</th>
+                    <th className="px-6 py-3 font-semibold text-gray-700">Status</th>
+                    <th className="px-6 py-3 font-semibold text-gray-700">Created</th>
+                    <th className="px-6 py-3 font-semibold text-gray-700">Notes</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {prospects.map((lead: any) => (
+                    <tr key={lead.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 font-medium text-gray-900">{lead.name}</td>
+                      <td className="px-6 py-4 text-gray-600">{lead.company}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize 
+                          ${lead.status === 'new' ? 'bg-blue-100 text-blue-800' : ''}
+                          ${lead.status === 'contacted' ? 'bg-yellow-100 text-yellow-800' : ''}
+                          ${lead.status === 'closed' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}
+                        `}>
+                          {lead.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-500">
+                        {new Date(lead.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-gray-500 truncate max-w-xs" title={lead.notes}>
+                        {lead.notes || '-'}
+                      </td>
+                    </tr>
+                  ))}
+                  {prospects.length === 0 && (
+                    <tr><td colSpan={5} className="px-6 py-12 text-center text-gray-500">No prospects added yet.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'ai' && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">Adoption Metric</h3>
+                        <p className="text-4xl font-bold text-purple-600">{aiStats.count}</p>
+                        <p className="text-sm text-gray-500 mt-1">Total questions asked to AI Coach</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">Last Activity</h3>
+                        <p className="text-xl font-medium text-gray-800">
+                            {aiStats.lastActive ? new Date(aiStats.lastActive).toLocaleString() : 'Never'}
+                        </p>
+                        <p className="text-sm text-gray-500 mt-1">Last interaction with AI</p>
+                    </div>
+                 </div>
+                 
+                 <div className="bg-blue-50 border border-blue-100 rounded-xl p-6">
+                     <h4 className="font-bold text-blue-900 mb-2">Privacy Note</h4>
+                     <p className="text-sm text-blue-700">
+                         For privacy reasons, the actual content of the AI chat conversations is not displayed here.
+                         You can only see usage metrics to gauge adoption and engagement.
+                     </p>
+                 </div>
+            </div>
+        )}
+
+        {activeTab === 'sales' && (
+          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            {/* Commissions Table embedded in Sales Tab */}
+            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
+                <div className="flex justify-between items-center mb-4">
+                     <h3 className="font-bold text-gray-900">Commission History</h3>
+                     <button 
+                        onClick={() => setShowCommModal(true)}
+                        className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-lg transition"
+                    >
+                        + Add Adjustment
+                    </button>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                        <thead className="bg-gray-50 border-b">
+                            <tr>
+                                <th className="px-4 py-2">Date</th>
+                                <th className="px-4 py-2">Note</th>
+                                <th className="px-4 py-2">Amount</th>
+                                <th className="px-4 py-2">Status</th>
+                                <th className="px-4 py-2 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                            {commissions.map((c: any) => (
+                                <tr key={c.id}>
+                                    <td className="px-4 py-2 text-gray-600">{new Date(c.created_at).toLocaleDateString()}</td>
+                                    <td className="px-4 py-2">{c.note}</td>
+                                    <td className={`px-4 py-2 font-mono ${c.amount_cents < 0 ? 'text-red-600' : 'text-green-700'}`}>
+                                        ${(c.amount_cents / 100).toLocaleString()}
+                                    </td>
+                                    <td className="px-4 py-2">
+                                        <span className={`px-2 py-0.5 rounded-full text-xs capitalize ${
+                                            c.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                        }`}>{c.status}</span>
+                                    </td>
+                                    <td className="px-4 py-2 text-right">
+                                         <button onClick={() => handleDeleteCommission(c.id)} className="text-gray-400 hover:text-red-500"><Trash2 size={14} /></button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div className="flex justify-between items-center">
+                <h3 className="font-bold text-gray-900">Active Clients (Portfolio)</h3>
                 <button 
                     onClick={() => setShowAssignModal(true)}
                     className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium shadow-sm"
                 >
                     <Plus size={16} />
-                    Assign Existing Client
+                    Assign Client
                 </button>
             </div>
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -342,70 +468,7 @@ export default function AmbassadorDetailClient({
                     </tr>
                   ))}
                   {clients.length === 0 && (
-                    <tr><td colSpan={4} className="px-6 py-12 text-center text-gray-500">No clients assigned yet.</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'commissions' && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-             <div className="flex justify-end">
-                <button 
-                    onClick={() => setShowCommModal(true)}
-                    className="flex items-center gap-2 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition text-sm font-medium shadow-sm"
-                >
-                    <Plus size={16} />
-                    Add Adjustment
-                </button>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-3 font-semibold text-gray-700">Date / Period</th>
-                    <th className="px-6 py-3 font-semibold text-gray-700">Note</th>
-                    <th className="px-6 py-3 font-semibold text-gray-700">Amount</th>
-                    <th className="px-6 py-3 font-semibold text-gray-700">Status</th>
-                    <th className="px-6 py-3 font-semibold text-gray-700 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {commissions.map((comm: any) => (
-                    <tr key={comm.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 text-gray-600">
-                        <div className="text-xs text-gray-400">{new Date(comm.created_at).toLocaleDateString()}</div>
-                        {comm.period_start}
-                      </td>
-                      <td className="px-6 py-4 text-gray-800">
-                        {comm.note || '-'}
-                      </td>
-                      <td className={`px-6 py-4 font-mono font-medium ${comm.amount_cents < 0 ? 'text-red-600' : 'text-gray-900'}`}>
-                        ${(comm.amount_cents / 100).toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${
-                          comm.status === 'paid' ? 'bg-green-100 text-green-800' : 
-                          comm.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {comm.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button 
-                            onClick={() => handleDeleteCommission(comm.id)}
-                            className="text-gray-400 hover:text-red-600 p-1 rounded transition" 
-                            title="Delete Commission"
-                        >
-                            <Trash2 size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                   {commissions.length === 0 && (
-                    <tr><td colSpan={5} className="px-6 py-12 text-center text-gray-500">No commissions found.</td></tr>
+                    <tr><td colSpan={4} className="px-6 py-12 text-center text-gray-500">No active sales yet.</td></tr>
                   )}
                 </tbody>
               </table>

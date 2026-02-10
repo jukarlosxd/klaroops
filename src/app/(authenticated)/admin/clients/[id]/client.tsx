@@ -21,7 +21,9 @@ import {
   ExternalLink,
   Search,
   UserPlus,
-  X
+  X,
+  BrainCircuit,
+  ArrowRight
 } from 'lucide-react';
 import { Client, Ambassador, DashboardProject, AIThread, AuditLog } from '@/types/admin';
 
@@ -30,15 +32,22 @@ interface Props {
   ambassadors: Ambassador[];
   initialDashboardProject: DashboardProject | null;
   initialAIThreads: AIThread[];
+  initialAIProfile: any;
   auditLogs: AuditLog[];
+  serviceAccountEmail?: string;
 }
+
+// Wizard Steps Definition
+type BuilderStep = 'setup' | 'generating' | 'review' | 'active';
 
 export default function ClientDetailClient({ 
   client, 
   ambassadors, 
   initialDashboardProject,
   initialAIThreads,
-  auditLogs 
+  initialAIProfile,
+  auditLogs,
+  serviceAccountEmail
 }: Props) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('overview');
@@ -50,13 +59,124 @@ export default function ClientDetailClient({
   const [selectedAmbassador, setSelectedAmbassador] = useState<Ambassador | null>(null);
   const [showAssignModal, setShowAssignModal] = useState(false);
 
-  // AI Builder State
-  const [sheetUrl, setSheetUrl] = useState('');
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiStep, setAiStep] = useState('');
-  const [previewData, setPreviewData] = useState<any>(null);
+  // AI Profile State
+  const [aiProfile, setAiProfile] = useState(initialAIProfile || {
+    business_type: '',
+    ai_instructions: '',
+    kpi_focus: [],
+    forbidden_metrics: []
+  });
+  const [profileSaving, setProfileSaving] = useState(false);
 
-  // AI Chat State
+  // AI Builder State
+  const [sheetUrl, setSheetUrl] = useState(project?.data_source_config_json ? JSON.parse(project.data_source_config_json).sheetId || '' : '');
+  const [availableSheets, setAvailableSheets] = useState<string[]>([]);
+  const [selectedSheets, setSelectedSheets] = useState<string[]>(project?.selected_sheets_json ? JSON.parse(JSON.stringify(project.selected_sheets_json)) : []);
+  const [builderStep, setBuilderStep] = useState<BuilderStep>(
+    project?.dashboard_status === 'ready' ? 'active' : 
+    project?.dashboard_status === 'draft' ? 'review' : 'setup'
+  );
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiStatusMessage, setAiStatusMessage] = useState('');
+  const [builderError, setBuilderError] = useState('');
+
+  // ... (Keep existing handlers: handleSaveProfile, handleActivate, handleReset, handleChat, Assignment) ...
+  // Update handleAutoGenerate to be split into 2 phases: Scan & Generate
+  
+  const handleScanSheets = async () => {
+    if (!sheetUrl) {
+        setBuilderError('Please provide a Google Sheets URL.');
+        return;
+    }
+    setBuilderError('');
+    setAiLoading(true);
+    setAiStatusMessage('Connecting to Google Sheets & Listing Tabs...');
+
+    try {
+         const res = await fetch('/api/admin/dashboard-builder/scan', {
+            method: 'POST',
+            body: JSON.stringify({ sheet_url: sheetUrl }) // Just scan for available sheets first
+        });
+        
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        setAvailableSheets(data.availableSheets || []);
+        
+        // If no sheets previously selected, default to first
+        if (selectedSheets.length === 0 && data.availableSheets?.length > 0) {
+            setSelectedSheets([data.availableSheets[0]]);
+        }
+        setAiStatusMessage('');
+    } catch (e: any) {
+        setBuilderError(e.message);
+    } finally {
+        setAiLoading(false);
+    }
+  };
+
+  const handleGenerateDashboard = async () => {
+    // Validation
+    if (!aiProfile.business_type) {
+        setBuilderError('Please specify a Business Type.');
+        return;
+    }
+    if (selectedSheets.length === 0) {
+        setBuilderError('Please select at least one sheet.');
+        return;
+    }
+
+    setBuilderError('');
+    setAiLoading(true);
+    setBuilderStep('generating');
+    
+    try {
+        // 1. Save Profile
+        await handleSaveProfile(true);
+
+        // 2. Full Scan of Selected Sheets
+        setAiStatusMessage(`Scanning ${selectedSheets.length} selected sheet(s)...`);
+        const scanRes = await fetch('/api/admin/dashboard-builder/scan', {
+            method: 'POST',
+            body: JSON.stringify({ 
+                sheet_url: sheetUrl, 
+                client_id: client.id,
+                selected_sheets: selectedSheets 
+            }) 
+        });
+        if (!scanRes.ok) throw new Error(await scanRes.text());
+
+        // 3. Generate Config
+        setAiStatusMessage('AI Architect is designing KPIs and Charts across sheets...');
+        const res = await fetch('/api/dashboard-builder/auto', {
+            method: 'POST',
+            body: JSON.stringify({ clientId: client.id })
+        });
+
+        if (!res.ok) throw new Error(await res.text());
+        const generated = await res.json();
+
+        // 4. Update Local State
+        setProject(prev => ({
+            ...prev,
+            id: prev?.id || 'temp',
+            client_id: client.id,
+            kpi_rules_json: JSON.stringify(generated.kpi_rules || generated.kpis, null, 2),
+            chart_config_json: JSON.stringify(generated.charts, null, 2),
+            dashboard_status: 'draft',
+            data_source_config_json: JSON.stringify({ sheetId: sheetUrl }),
+            selected_sheets_json: selectedSheets // Update local prop if needed
+        } as any));
+
+        setBuilderStep('review');
+
+    } catch (e: any) {
+        setBuilderError(e.message);
+        setBuilderStep('setup');
+    } finally {
+        setAiLoading(false);
+        setAiStatusMessage('');
+    }
+  };
   const [chatInput, setChatInput] = useState('');
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [chatLoading, setChatLoading] = useState(false);
@@ -69,102 +189,124 @@ export default function ClientDetailClient({
     { id: 'ai', label: 'AI Assistant', icon: Bot },
   ];
 
-  const handleUpdateDashboard = async (newData: any) => {
-    setLoading(true);
+  const handleSaveProfile = async (silent = false) => {
+    if (!silent) setProfileSaving(true);
     try {
-        const res = await fetch(`/api/admin/clients/${client.id}/dashboard-project`, {
+        const res = await fetch(`/api/admin/clients/${client.id}/ai-profile`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newData)
+            body: JSON.stringify(aiProfile)
         });
         if (res.ok) {
-            const updated = await res.json();
-            setProject(updated);
-            alert('Dashboard configuration saved.');
+            const saved = await res.json();
+            setAiProfile(saved);
+            if (!silent) alert('AI Profile Saved!');
         }
-    } catch (e) { console.error(e); alert('Error saving'); }
-    setLoading(false);
+    } catch (e) { 
+        if (!silent) alert('Error saving profile'); 
+    }
+    if (!silent) setProfileSaving(false);
   };
 
-  const handleGenerateWithAI = async () => {
-    if (!sheetUrl) return alert('Please enter a Google Sheet URL');
+  const handleAutoGenerate = async () => {
+    // Validation
+    if (!aiProfile.business_type) {
+        setBuilderError('Please specify a Business Type (e.g. "Manufacturing") so the AI understands the context.');
+        return;
+    }
+    if (!sheetUrl) {
+        setBuilderError('Please provide a Google Sheets URL.');
+        return;
+    }
+
+    setBuilderError('');
     setAiLoading(true);
+    setBuilderStep('generating');
     
     try {
-        // 1. Scan Sheet
-        setAiStep('Scanning Google Sheet...');
+        // 1. Save Profile first to ensure backend has context
+        await handleSaveProfile(true);
+
+        // 2. Scan Data Source
+        setAiStatusMessage('Scanning Data Source & Validating Permissions...');
         const scanRes = await fetch('/api/admin/dashboard-builder/scan', {
             method: 'POST',
-            body: JSON.stringify({ sheet_url: sheetUrl })
+            body: JSON.stringify({ sheet_url: sheetUrl, client_id: client.id }) 
         });
         
-        if (!scanRes.ok) throw new Error(await scanRes.text());
-        const scanData = await scanRes.json();
+        if (!scanRes.ok) {
+            const err = await scanRes.text();
+            throw new Error(`Scan failed: ${err}`);
+        }
 
-        // 2. Generate Config
-        setAiStep('Analyzing data & generating config...');
-        const genRes = await fetch('/api/admin/dashboard-builder/generate', {
+        // 3. Generate Dashboard Config
+        setAiStatusMessage('AI Architect is designing KPIs and Charts...');
+        const res = await fetch('/api/dashboard-builder/auto', {
             method: 'POST',
-            body: JSON.stringify({
-                client_id: client.id,
-                template_key: project?.template_key || 'custom',
-                headers: scanData.headers,
-                sample_rows: scanData.sampleRows,
-                inferred_types: scanData.inferredTypes
-            })
+            body: JSON.stringify({ clientId: client.id })
         });
 
-        if (!genRes.ok) throw new Error(await genRes.text());
-        const generated = await genRes.json();
+        if (!res.ok) throw new Error(await res.text());
+        const generated = await res.json();
 
-        // Update local state with generated config
-        setProject(prev => prev ? {
+        // 4. Update Local State & Move to Review
+        setProject(prev => ({
             ...prev,
-            data_source_config_json: JSON.stringify(generated.source_config, null, 2),
-            mapping_json: JSON.stringify(generated.column_mapping, null, 2),
-            kpi_rules_json: JSON.stringify(generated.kpi_rules, null, 2),
-            dashboard_status: 'configuring'
-        } : null);
+            id: prev?.id || 'temp',
+            client_id: client.id,
+            kpi_rules_json: JSON.stringify(generated.kpi_rules || generated.kpis, null, 2),
+            chart_config_json: JSON.stringify(generated.charts, null, 2),
+            dashboard_status: 'draft',
+            // Save source config locally for persistence
+            data_source_config_json: JSON.stringify({ sheetId: sheetUrl }) 
+        } as any));
 
-        setAiStep('Done!');
-        alert('Configuration generated! Review the mapping below.');
+        setBuilderStep('review');
 
     } catch (e: any) {
-        console.error(e);
-        // Truncate error message if too long for alert
-        const msg = e.message || 'Generation failed';
-        alert(`Error: ${msg.length > 200 ? msg.substring(0, 200) + '...' : msg}`);
+        setBuilderError(e.message || 'Generation failed. Please check the URL and permissions.');
+        setBuilderStep('setup');
     } finally {
         setAiLoading(false);
-        setAiStep('');
+        setAiStatusMessage('');
     }
   };
 
   const handleActivate = async () => {
-    if(!confirm('Are you sure you want to activate this dashboard?')) return;
+    if(!confirm('This will make the dashboard live for the client. Continue?')) return;
     setLoading(true);
     try {
-        await fetch('/api/admin/dashboard-builder/activate', {
+        const res = await fetch('/api/admin/dashboard-builder/activate', {
             method: 'POST',
             body: JSON.stringify({ client_id: client.id })
         });
+        if (!res.ok) throw new Error(await res.text());
+        
         setProject(prev => prev ? {...prev, dashboard_status: 'ready'} : null);
-        alert('Dashboard Activated!');
-    } catch(e) { alert('Error activating'); }
+        setBuilderStep('active');
+        alert('Dashboard is now LIVE!');
+    } catch(e: any) { 
+        alert('Error activating: ' + e.message); 
+    }
     setLoading(false);
   };
 
+  const handleReset = () => {
+      if(!confirm('Discard current draft and start over?')) return;
+      setBuilderStep('setup');
+      setBuilderError('');
+  };
+
+  // ... (Chat and Assignment handlers remain unchanged) ...
   const handleChat = async () => {
     if (!chatInput.trim()) return;
     const msg = chatInput;
     setChatInput('');
     setChatMessages(prev => [...prev, { role: 'user', content: msg }]);
     setChatLoading(true);
-
     try {
         const res = await fetch(`/api/admin/clients/${client.id}/ai-chat`, {
             method: 'POST',
-            body: JSON.stringify({ message: msg }) // thread_id handling simplified for demo
+            body: JSON.stringify({ message: msg })
         });
         const data = await res.json();
         setChatMessages(prev => [...prev, { role: 'assistant', content: data.message.content }]);
@@ -183,23 +325,16 @@ export default function ClientDetailClient({
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ambassador_id: selectedAmbassador.id })
         });
-        
         if (!res.ok) throw new Error(await res.text());
-        
-        const updatedClient = await res.json();
-        alert('Assignment updated successfully');
+        alert('Assignment updated');
         setShowAssignModal(false);
         router.refresh();
-        
-    } catch (error: any) {
-        console.error(error);
-        alert('Failed to assign ambassador');
-    }
+    } catch (error) { alert('Failed to assign'); }
     setLoading(false);
   };
 
   const handleUnassign = async () => {
-    if (!confirm('Are you sure you want to unassign the current ambassador?')) return;
+    if (!confirm('Unassign ambassador?')) return;
     setLoading(true);
     try {
         const res = await fetch(`/api/admin/clients/${client.id}/assign-ambassador`, {
@@ -207,39 +342,21 @@ export default function ClientDetailClient({
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ambassador_id: null })
         });
-        
         if (!res.ok) throw new Error(await res.text());
-        
-        alert('Ambassador unassigned');
+        alert('Unassigned');
         router.refresh();
-        
-    } catch (error: any) {
-        console.error(error);
-        alert('Failed to unassign');
-    }
+    } catch (error) { alert('Failed'); }
     setLoading(false);
   };
 
   const handleDeleteClient = async () => {
-    if (!confirm('Are you sure you want to DELETE this client? This action cannot be undone and will remove all associated data including dashboard configuration.')) return;
+    if (!confirm('DELETE client?')) return;
     setLoading(true);
     try {
-        const res = await fetch(`/api/admin/clients/${client.id}`, {
-            method: 'DELETE',
-        });
-        
+        const res = await fetch(`/api/admin/clients/${client.id}`, { method: 'DELETE' });
         if (!res.ok) throw new Error(await res.text());
-        
-        alert('Client deleted successfully');
-        // Force full redirect to clients list to clear client-side cache
         window.location.href = '/admin/clients';
-        return; // Stop execution here as page will reload
-        
-    } catch (error: any) {
-        console.error(error);
-        alert('Failed to delete client');
-        setLoading(false);
-    }
+    } catch (error) { alert('Failed to delete'); setLoading(false); }
   };
 
   const filteredAmbassadors = ambassadors.filter(a => 
@@ -259,7 +376,6 @@ export default function ClientDetailClient({
                 <h1 className="text-2xl font-bold tracking-tight text-gray-900">{client.name}</h1>
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                     <span>{client.industry || 'No Industry'}</span>
-                    <span>•</span>
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
                         client.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                     }`}>
@@ -269,23 +385,11 @@ export default function ClientDetailClient({
             </div>
         </div>
         
-        {/* Actions */}
         <div className="flex gap-2">
-            <button 
-                onClick={handleDeleteClient}
-                disabled={loading}
-                className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-medium text-sm transition"
-            >
-                <X size={16} />
-                Delete
-            </button>
+            <button onClick={handleDeleteClient} disabled={loading} className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm font-medium">Delete</button>
             {project?.dashboard_status === 'ready' && (
-                <button 
-                    onClick={() => window.open(`/dashboard/view/${client.id}`, '_blank')}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition"
-                >
-                    <ExternalLink size={16} />
-                    Open Live Dashboard
+                <button onClick={() => window.open(`/dashboard/view/${client.id}`, '_blank')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex gap-2 items-center">
+                    <ExternalLink size={16} /> Open Dashboard
                 </button>
             )}
         </div>
@@ -298,9 +402,7 @@ export default function ClientDetailClient({
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 pb-3 text-sm font-medium transition border-b-2 whitespace-nowrap ${
-              activeTab === tab.id 
-                ? 'border-blue-600 text-blue-600' 
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+              activeTab === tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
             <tab.icon size={16} />
@@ -316,26 +418,13 @@ export default function ClientDetailClient({
         {activeTab === 'overview' && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in">
                 <div className="bg-white p-6 rounded-xl border shadow-sm">
-                    <h3 className="font-bold text-gray-900 mb-4">Contract Details</h3>
+                    <h3 className="font-bold text-gray-900 mb-4">Contract</h3>
                     <div className="space-y-3 text-sm">
-                        <div className="flex justify-between">
-                            <span className="text-gray-500">Value</span>
-                            <span className="font-medium">
-                                ${(client.contract_value_cents ? client.contract_value_cents / 100 : 0).toLocaleString()}
-                            </span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-gray-500">Type</span>
-                            <span className="font-medium capitalize">{client.contract_type}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-gray-500">Start Date</span>
-                            <span className="font-medium">{client.contract_start || '-'}</span>
-                        </div>
+                        <div className="flex justify-between"><span className="text-gray-500">Value</span><span className="font-medium">${(client.contract_value_cents ? client.contract_value_cents / 100 : 0).toLocaleString()}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">Type</span><span className="font-medium capitalize">{client.contract_type}</span></div>
                     </div>
                 </div>
-
-                <div className="bg-white p-6 rounded-xl border shadow-sm">
+                 <div className="bg-white p-6 rounded-xl border shadow-sm">
                     <h3 className="font-bold text-gray-900 mb-4">Assignment</h3>
                     {client.ambassador_id ? (
                         <div className="flex items-center gap-3">
@@ -343,412 +432,404 @@ export default function ClientDetailClient({
                                 {ambassadors.find(a => a.id === client.ambassador_id)?.name.charAt(0)}
                             </div>
                             <div>
-                                <p className="font-medium text-gray-900">
-                                    {ambassadors.find(a => a.id === client.ambassador_id)?.name}
-                                </p>
-                                <p className="text-xs text-green-600">Active Ambassador</p>
+                                <p className="font-medium text-gray-900">{ambassadors.find(a => a.id === client.ambassador_id)?.name}</p>
+                                <p className="text-xs text-green-600">Active</p>
                             </div>
                         </div>
                     ) : (
-                        <div className="text-center py-4 bg-gray-50 rounded-lg border border-dashed">
-                            <p className="text-sm text-gray-500 mb-2">No ambassador assigned</p>
-                            <button 
-                                onClick={() => setActiveTab('assignment')}
-                                className="text-blue-600 text-xs font-medium hover:underline"
-                            >
-                                Assign Now
-                            </button>
-                        </div>
+                        <button onClick={() => setActiveTab('assignment')} className="text-blue-600 text-sm hover:underline">Assign Now</button>
                     )}
-                </div>
-
-                <div className="md:col-span-3 bg-white p-6 rounded-xl border shadow-sm">
-                    <h3 className="font-bold text-gray-900 mb-4">Recent Audit Log</h3>
-                    <div className="space-y-2">
-                        {auditLogs.slice(0, 5).map(log => (
-                            <div key={log.id} className="text-xs flex gap-3 py-2 border-b last:border-0">
-                                <span className="text-gray-400 font-mono">{new Date(log.created_at).toLocaleDateString()}</span>
-                                <span className="font-medium text-gray-900">{log.action}</span>
-                                <span className="text-gray-500">by {log.actor_user_id}</span>
-                            </div>
-                        ))}
-                        {auditLogs.length === 0 && <p className="text-sm text-gray-500 italic">No activity recorded yet.</p>}
-                    </div>
                 </div>
             </div>
         )}
 
-        {/* DASHBOARD BUILDER */}
+        {/* DASHBOARD BUILDER (WIZARD FLOW) */}
         {activeTab === 'dashboard' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in">
-                <div className="space-y-6">
-                    <div className="bg-white p-6 rounded-xl border shadow-sm">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="font-bold text-lg">Configuration</h3>
-                            <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${
-                                project?.dashboard_status === 'ready' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                            }`}>
-                                {project?.dashboard_status || 'NOT STARTED'}
-                            </span>
+            <div className="max-w-5xl mx-auto animate-in fade-in">
+                
+                {/* STEP INDICATOR */}
+                <div className="mb-8 flex items-center justify-center">
+                    <div className={`flex items-center gap-2 ${['setup', 'generating', 'review', 'active'].includes(builderStep) ? 'text-blue-600 font-bold' : 'text-gray-400'}`}>
+                        <div className="w-8 h-8 rounded-full border-2 border-current flex items-center justify-center">1</div>
+                        <span>Context & Data</span>
+                    </div>
+                    <div className="w-12 h-px bg-gray-300 mx-4"></div>
+                    <div className={`flex items-center gap-2 ${['review', 'active'].includes(builderStep) ? 'text-blue-600 font-bold' : 'text-gray-400'}`}>
+                        <div className="w-8 h-8 rounded-full border-2 border-current flex items-center justify-center">2</div>
+                        <span>AI Proposal</span>
+                    </div>
+                    <div className="w-12 h-px bg-gray-300 mx-4"></div>
+                    <div className={`flex items-center gap-2 ${builderStep === 'active' ? 'text-green-600 font-bold' : 'text-gray-400'}`}>
+                        <div className="w-8 h-8 rounded-full border-2 border-current flex items-center justify-center">3</div>
+                        <span>Live</span>
+                    </div>
+                </div>
+
+                {/* ERROR MESSAGE */}
+                {builderError && (
+                    <div className="mb-6 bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg flex items-center gap-3">
+                        <AlertTriangle className="flex-shrink-0" />
+                        <p>{builderError}</p>
+                    </div>
+                )}
+
+                {/* STEP 1: SETUP */}
+                {builderStep === 'setup' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Client Profile */}
+                        <div className="bg-white p-6 rounded-xl border shadow-sm">
+                            <h3 className="font-bold text-lg flex items-center gap-2 mb-4 text-gray-900">
+                                <BrainCircuit className="text-purple-600" />
+                                1. AI Context (Mandatory)
+                            </h3>
+                            <p className="text-sm text-gray-500 mb-6">Define the business context so the AI knows what metrics matter.</p>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Business Type <span className="text-red-500">*</span></label>
+                                    <input 
+                                        className="w-full border rounded-lg p-3"
+                                        placeholder="e.g. Textile Manufacturing, SaaS, Logistics..."
+                                        value={aiProfile.business_type || ''}
+                                        onChange={e => setAiProfile({...aiProfile, business_type: e.target.value})}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Specific Instructions</label>
+                                    <textarea 
+                                        className="w-full border rounded-lg p-3 h-32"
+                                        placeholder="e.g. Focus on machine downtime and defect rates. Ignore financial metrics for now."
+                                        value={aiProfile.ai_instructions || ''}
+                                        onChange={e => setAiProfile({...aiProfile, ai_instructions: e.target.value})}
+                                    />
+                                </div>
+                            </div>
                         </div>
 
-                        {/* AI Generator Section */}
-                        <div className="mb-6 p-4 bg-purple-50 rounded-xl border border-purple-100">
-                            <h4 className="font-bold text-purple-900 flex items-center gap-2 mb-2">
-                                <Sparkles size={18} />
-                                AI Generator
-                            </h4>
-                            <p className="text-sm text-purple-700 mb-3">
-                                Paste a Google Sheets link to auto-generate the configuration.
-                            </p>
-                            <div className="flex gap-2">
-                                <input 
-                                    type="text" 
-                                    className="flex-1 border border-purple-200 rounded-lg p-2 text-sm focus:ring-2 focus:ring-purple-500 outline-none"
-                                    placeholder="https://docs.google.com/spreadsheets/d/..."
-                                    value={sheetUrl}
-                                    onChange={(e) => setSheetUrl(e.target.value)}
-                                    disabled={aiLoading}
-                                />
+                        {/* Data Source */}
+                        <div className="bg-white p-6 rounded-xl border shadow-sm flex flex-col">
+                            <h3 className="font-bold text-lg flex items-center gap-2 mb-4 text-gray-900">
+                                <FileText className="text-blue-600" />
+                                2. Data Source
+                            </h3>
+                            
+                            <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg mb-6">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className={`w-3 h-3 rounded-full ${serviceAccountEmail ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                                    <span className="text-sm font-bold text-blue-900">
+                                        Google Sheets API: {serviceAccountEmail ? 'Configured' : 'Not Configured'}
+                                    </span>
+                                </div>
+                                <p className="text-sm text-blue-800 mb-2">
+                                    Share your Google Sheet with the system service account (Viewer access):
+                                </p>
+                                <div className="bg-white p-2 rounded border border-blue-200 text-xs font-mono text-gray-600 select-all break-all">
+                                    {serviceAccountEmail || 'ERROR: No Service Account Configured'}
+                                </div>
+                            </div>
+
+                            <div className="flex-1 space-y-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Google Sheet URL <span className="text-red-500">*</span></label>
+                                    <div className="flex gap-2">
+                                        <input 
+                                            className="w-full border rounded-lg p-3"
+                                            placeholder="https://docs.google.com/spreadsheets/d/..."
+                                            value={sheetUrl}
+                                            onChange={e => setSheetUrl(e.target.value)}
+                                        />
+                                        <button 
+                                            onClick={handleScanSheets}
+                                            disabled={aiLoading || !sheetUrl}
+                                            className="px-4 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 font-medium text-sm whitespace-nowrap"
+                                        >
+                                            Scan Sheets
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {availableSheets.length > 0 && (
+                                    <div className="bg-gray-50 p-4 rounded-lg border">
+                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Select Sheets to Include:</label>
+                                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                                            {availableSheets.map(sheet => (
+                                                <label key={sheet} className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 p-1 rounded">
+                                                    <input 
+                                                        type="checkbox"
+                                                        className="w-4 h-4 text-blue-600 rounded"
+                                                        checked={selectedSheets.includes(sheet)}
+                                                        onChange={e => {
+                                                            if (e.target.checked) {
+                                                                setSelectedSheets([...selectedSheets, sheet]);
+                                                            } else {
+                                                                setSelectedSheets(selectedSheets.filter(s => s !== sheet));
+                                                            }
+                                                        }}
+                                                    />
+                                                    <span className="text-sm text-gray-900">{sheet}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                        <p className="text-xs text-gray-500 mt-2">Selected: {selectedSheets.length}</p>
+                                    </div>
+                                )}
+
+                                <div className="text-xs text-gray-500">
+                                    <strong>Tip:</strong> The sheet must have a header row. The AI will scan the first 25 rows.
+                                </div>
+                            </div>
+
+                            <div className="mt-8 pt-6 border-t">
                                 <button 
-                                    onClick={handleGenerateWithAI}
-                                    disabled={aiLoading || !sheetUrl}
-                                    className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium text-sm hover:bg-purple-700 disabled:opacity-50 flex items-center gap-2"
+                                    onClick={handleGenerateDashboard}
+                                    disabled={aiLoading || selectedSheets.length === 0}
+                                    className="w-full py-4 bg-gray-900 text-white rounded-xl font-bold shadow-lg hover:bg-black transition flex justify-center items-center gap-3 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {aiLoading ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />}
-                                    Generate
+                                    {aiLoading ? (
+                                        <>
+                                            <Loader2 className="animate-spin" />
+                                            {aiStatusMessage}
+                                        </>
+                                    ) : (
+                                        <>
+                                            Generate Dashboard
+                                            <ArrowRight size={20} />
+                                        </>
+                                    )}
                                 </button>
                             </div>
-                            {aiStep && (
-                                <p className="text-xs text-purple-600 mt-2 font-medium animate-pulse">
-                                    {aiStep}
-                                </p>
-                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* STEP 2: GENERATING (LOADING) */}
+                {builderStep === 'generating' && (
+                    <div className="bg-white p-12 rounded-xl border shadow-sm text-center">
+                        <div className="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Sparkles size={32} className="animate-pulse" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-2">Building Dashboard...</h3>
+                        <p className="text-gray-500 mb-8">{aiStatusMessage || 'Please wait while AI analyzes the data.'}</p>
+                        
+                        <div className="max-w-md mx-auto bg-gray-100 rounded-full h-2 overflow-hidden">
+                            <div className="h-full bg-purple-600 animate-progress w-2/3"></div>
+                        </div>
+                    </div>
+                )}
+
+                {/* STEP 3: REVIEW */}
+                {builderStep === 'review' && (
+                    <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
+                        <div className="p-6 border-b bg-gray-50 flex justify-between items-center">
+                            <div>
+                                <h3 className="font-bold text-xl text-gray-900">Review AI Proposal</h3>
+                                <p className="text-sm text-gray-500">The AI has generated this configuration based on your profile.</p>
+                            </div>
+                            <div className="flex gap-3">
+                                <button 
+                                    onClick={handleReset}
+                                    className="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg font-medium text-sm transition"
+                                >
+                                    Discard & Edit
+                                </button>
+                                <button 
+                                    onClick={handleActivate}
+                                    className="px-6 py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 shadow-md transition flex items-center gap-2"
+                                >
+                                    <Check size={18} />
+                                    Activate Dashboard
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Template</label>
-                                <select 
-                                    className="w-full border rounded-lg p-2 bg-gray-50"
-                                    value={project?.template_key || 'custom'}
-                                    disabled
-                                >
-                                    <option value="sales_overview">Sales Overview</option>
-                                    <option value="manufacturing">Manufacturing Ops</option>
-                                    <option value="custom">Custom</option>
-                                </select>
-                            </div>
+                        <div className="p-8 bg-gray-100 min-h-[400px]">
+                            {/* PREVIEW CONTENT */}
+                             <div className="space-y-8">
+                                {/* KPIs Preview */}
+                                <div>
+                                    <h4 className="text-sm font-bold text-gray-500 uppercase mb-3">Proposed KPIs</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        {project?.kpi_rules_json && JSON.parse(project.kpi_rules_json).map((kpi: any, i: number) => (
+                                            <div key={i} className="bg-white p-4 rounded-lg shadow-sm border">
+                                                <p className="text-xs text-gray-500 uppercase tracking-wide">{kpi.label}</p>
+                                                <div className="h-2 w-12 bg-gray-200 my-2 rounded"></div>
+                                                <p className="text-xs text-blue-600 font-mono mt-2 bg-blue-50 inline-block px-2 py-1 rounded">
+                                                    {kpi.aggregation}({kpi.metric})
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Data Source Type</label>
-                                <select 
-                                    className="w-full border rounded-lg p-2"
-                                    value={project?.data_source_type || 'manual'}
-                                    onChange={(e) => handleUpdateDashboard({ data_source_type: e.target.value })}
-                                >
-                                    <option value="manual">Manual Entry</option>
-                                    <option value="google_sheets">Google Sheets</option>
-                                    <option value="csv">CSV Upload</option>
-                                    <option value="api">API Integration</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Source Config (JSON)</label>
-                                <textarea 
-                                    className="w-full border rounded-lg p-3 font-mono text-xs h-32"
-                                    value={project?.data_source_config_json || '{}'}
-                                    onChange={(e) => setProject(prev => prev ? ({...prev, data_source_config_json: e.target.value}) : null)}
-                                    placeholder='{"sheetId": "..."}'
-                                />
+                                {/* Charts Preview */}
+                                <div>
+                                    <h4 className="text-sm font-bold text-gray-500 uppercase mb-3">Proposed Charts</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {project?.chart_config_json && JSON.parse(project.chart_config_json).map((chart: any, i: number) => (
+                                            <div key={i} className="bg-white p-6 rounded-lg shadow-sm border flex flex-col items-center text-center h-48 justify-center">
+                                                <h5 className="font-bold text-gray-900 mb-4">{chart.title}</h5>
+                                                {chart.type === 'line' && <div className="w-full h-12 bg-gradient-to-r from-transparent via-blue-200 to-transparent border-b-2 border-blue-500"></div>}
+                                                {chart.type === 'bar' && <div className="flex gap-2 items-end h-16"><div className="w-4 h-8 bg-blue-500"></div><div className="w-4 h-12 bg-blue-300"></div><div className="w-4 h-6 bg-blue-600"></div></div>}
+                                                {chart.type === 'pie' && <div className="w-16 h-16 rounded-full border-4 border-blue-500 border-t-blue-200"></div>}
+                                                <p className="text-xs text-gray-400 mt-4">{chart.x} vs {chart.y}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
 
-                <div className="space-y-6">
-                    <div className="bg-white p-6 rounded-xl border shadow-sm h-full flex flex-col">
-                        <h3 className="font-bold text-lg mb-4">Mapping & Rules</h3>
-                        <div className="flex-1 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Column Mapping (JSON)</label>
-                                <textarea 
-                                    className="w-full border rounded-lg p-3 font-mono text-xs h-40"
-                                    value={project?.mapping_json || '{}'}
-                                    onChange={(e) => setProject(prev => prev ? ({...prev, mapping_json: e.target.value}) : null)}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">KPI Rules (JSON)</label>
-                                <textarea 
-                                    className="w-full border rounded-lg p-3 font-mono text-xs h-40"
-                                    value={project?.kpi_rules_json || '{}'}
-                                    onChange={(e) => setProject(prev => prev ? ({...prev, kpi_rules_json: e.target.value}) : null)}
-                                />
-                            </div>
+                {/* STEP 4: ACTIVE */}
+                {builderStep === 'active' && (
+                    <div className="bg-white p-12 rounded-xl border shadow-sm text-center">
+                        <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Check size={40} />
                         </div>
-                        <div className="pt-6 mt-4 border-t flex justify-end gap-3">
+                        <h3 className="text-3xl font-bold text-gray-900 mb-2">Dashboard is Live</h3>
+                        <p className="text-gray-500 mb-8">The dashboard has been successfully generated and activated for this client.</p>
+                        
+                        <div className="flex justify-center gap-4">
                             <button 
-                                onClick={handleActivate}
-                                disabled={loading || project?.dashboard_status === 'ready'}
-                                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:bg-gray-300"
+                                onClick={() => setBuilderStep('setup')}
+                                className="px-6 py-3 text-gray-600 border border-gray-300 rounded-xl font-medium hover:bg-gray-50 transition"
                             >
-                                <Check size={16} />
-                                {project?.dashboard_status === 'ready' ? 'Active' : 'Activate'}
+                                Re-configure
                             </button>
                             <button 
-                                onClick={() => handleUpdateDashboard({ 
-                                    data_source_config_json: project?.data_source_config_json,
-                                    mapping_json: project?.mapping_json,
-                                    kpi_rules_json: project?.kpi_rules_json
-                                })}
-                                disabled={loading}
-                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                                onClick={() => window.open(`/dashboard/view/${client.id}`, '_blank')}
+                                className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg transition flex items-center gap-2"
                             >
-                                <Save size={16} />
-                                Save
+                                <ExternalLink size={20} />
+                                Open Dashboard
                             </button>
                         </div>
                     </div>
-                </div>
+                )}
+
             </div>
         )}
 
         {/* AI CHAT */}
         {activeTab === 'ai' && (
-            <div className="bg-white rounded-xl border shadow-sm h-[600px] flex flex-col overflow-hidden animate-in fade-in">
+             <div className="bg-white rounded-xl border shadow-sm h-[600px] flex flex-col overflow-hidden animate-in fade-in">
                 <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
-                    <h3 className="font-bold flex items-center gap-2">
-                        <Bot className="text-purple-600" />
-                        AI Data Analyst
-                    </h3>
+                    <h3 className="font-bold flex items-center gap-2"><Bot className="text-purple-600" /> AI Data Analyst</h3>
                     <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded border">Beta</span>
                 </div>
-                
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                     {chatMessages.length === 0 && (
                         <div className="text-center py-12 text-gray-400">
                             <Bot size={48} className="mx-auto mb-4 opacity-20" />
-                            <p>Ask questions about your data or configuration.</p>
-                            <div className="mt-4 flex flex-wrap justify-center gap-2">
-                                {["What columns are available?", "How is revenue calculated?", "Map 'Amount' to Revenue"].map(q => (
-                                    <button 
-                                        key={q} 
-                                        onClick={() => setChatInput(q)}
-                                        className="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-full transition"
-                                    >
-                                        {q}
-                                    </button>
-                                ))}
-                            </div>
+                            <p>Ask questions about your data.</p>
                         </div>
                     )}
                     {chatMessages.map((msg, idx) => (
                         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[80%] rounded-lg p-3 text-sm ${
-                                msg.role === 'user' 
-                                    ? 'bg-blue-600 text-white rounded-br-none' 
-                                    : 'bg-gray-100 text-gray-800 rounded-bl-none'
-                            }`}>
-                                {msg.content}
-                            </div>
+                            <div className={`max-w-[80%] rounded-lg p-3 text-sm ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-gray-100 text-gray-800 rounded-bl-none'}`}>{msg.content}</div>
                         </div>
                     ))}
-                    {chatLoading && (
-                        <div className="flex justify-start">
-                            <div className="bg-gray-100 rounded-lg p-3 rounded-bl-none">
-                                <Loader2 size={16} className="animate-spin text-gray-400" />
-                            </div>
-                        </div>
-                    )}
+                    {chatLoading && <div className="flex justify-start"><Loader2 size={16} className="animate-spin text-gray-400" /></div>}
                 </div>
-
-                <div className="p-4 border-t bg-white">
-                    <div className="flex gap-2">
-                        <input 
-                            type="text" 
-                            className="flex-1 border rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 outline-none"
-                            placeholder="Type a message..."
-                            value={chatInput}
-                            onChange={(e) => setChatInput(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleChat()}
-                            disabled={chatLoading}
-                        />
-                        <button 
-                            onClick={handleChat}
-                            disabled={!chatInput.trim() || chatLoading}
-                            className="bg-purple-600 text-white p-2 rounded-lg hover:bg-purple-700 disabled:opacity-50"
-                        >
-                            <Play size={20} className="fill-current" />
-                        </button>
-                    </div>
+                <div className="p-4 border-t bg-white flex gap-2">
+                    <input className="flex-1 border rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 outline-none" placeholder="Type a message..." value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleChat()} disabled={chatLoading} />
+                    <button onClick={handleChat} disabled={!chatInput.trim() || chatLoading} className="bg-purple-600 text-white p-2 rounded-lg hover:bg-purple-700 disabled:opacity-50"><Play size={20} className="fill-current" /></button>
                 </div>
             </div>
         )}
 
-        {/* ASSIGNMENT TAB */}
+        {/* ASSIGNMENT */}
         {activeTab === 'assignment' && (
-            <div className="space-y-6 animate-in fade-in">
-                {/* Current Assignment Card */}
-                <div className="bg-white p-6 rounded-xl border shadow-sm">
-                    <h3 className="font-bold text-gray-900 mb-4">Current Assignment</h3>
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            {client.ambassador_id ? (
-                                <>
-                                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-lg">
-                                        {ambassadors.find(a => a.id === client.ambassador_id)?.name.charAt(0)}
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-gray-900 text-lg">
-                                            {ambassadors.find(a => a.id === client.ambassador_id)?.name}
-                                        </p>
-                                        <p className="text-sm text-gray-500">
-                                            {ambassadors.find(a => a.id === client.ambassador_id)?.email}
-                                        </p>
-                                    </div>
-                                </>
-                            ) : (
-                                <div className="flex items-center gap-3 text-gray-500">
-                                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                                        <UserCheck size={24} />
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-gray-900">Unassigned</p>
-                                        <p className="text-sm">This client is not managed by anyone.</p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                        {client.ambassador_id && (
-                            <button 
-                                onClick={handleUnassign}
-                                disabled={loading}
-                                className="text-red-600 text-sm font-medium hover:bg-red-50 px-3 py-2 rounded-lg transition"
-                            >
-                                Unassign
-                            </button>
-                        )}
+            <div className="bg-white p-6 rounded-xl border shadow-sm">
+                 <h3 className="font-bold text-gray-900 mb-4">Assignment Management</h3>
+                 <div className="flex justify-between items-center mb-4">
+                    <div className="flex items-center gap-4">
+                         {client.ambassador_id ? (
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">{ambassadors.find(a => a.id === client.ambassador_id)?.name.charAt(0)}</div>
+                                <div><p className="font-medium">{ambassadors.find(a => a.id === client.ambassador_id)?.name}</p></div>
+                            </div>
+                         ) : <p>Unassigned</p>}
                     </div>
-                </div>
+                    {client.ambassador_id ? <button onClick={handleUnassign} className="text-red-600 text-sm">Unassign</button> : null}
+                 </div>
+                 <div className="border-t pt-4">
+                    <input placeholder="Search ambassador..." className="w-full border rounded p-2 mb-2" value={assignSearch} onChange={e => setAssignSearch(e.target.value)} />
+                    <div className="max-h-40 overflow-y-auto space-y-2">
+                        {filteredAmbassadors.map(amb => (
+                            <div key={amb.id} className="flex justify-between items-center p-2 hover:bg-gray-50">
+                                <span>{amb.name}</span>
+                                {client.ambassador_id !== amb.id && <button onClick={() => { setSelectedAmbassador(amb); setShowAssignModal(true); }} className="text-blue-600 text-xs">Assign</button>}
+                            </div>
+                        ))}
+                    </div>
+                 </div>
+            </div>
+        )}
 
-                {/* Assignment List */}
-                <div className="bg-white rounded-xl border shadow-sm overflow-hidden">
-                    <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
-                        <h3 className="font-bold text-gray-900">Available Ambassadors</h3>
-                        <div className="relative w-64">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                            <input 
-                                type="text" 
-                                placeholder="Search..." 
-                                className="w-full pl-9 pr-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                                value={assignSearch}
-                                onChange={(e) => setAssignSearch(e.target.value)}
-                            />
-                        </div>
-                    </div>
-                    
-                    <div className="divide-y max-h-[400px] overflow-y-auto">
-                        {filteredAmbassadors.length === 0 ? (
-                            <div className="p-8 text-center text-gray-500">No ambassadors found.</div>
-                        ) : (
-                            filteredAmbassadors.map(amb => (
-                                <div key={amb.id} className="p-4 flex items-center justify-between hover:bg-gray-50 transition">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-medium text-gray-600">
-                                            {amb.name.charAt(0)}
-                                        </div>
-                                        <div>
-                                            <p className="font-medium text-gray-900">{amb.name}</p>
-                                            <p className="text-xs text-gray-500">{amb.email}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-4">
-                                        <span className={`px-2 py-1 rounded text-xs font-medium capitalize ${
-                                            amb.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                                        }`}>
-                                            {amb.status}
-                                        </span>
-                                        {client.ambassador_id !== amb.id && (
-                                            <button 
-                                                onClick={() => {
-                                                    setSelectedAmbassador(amb);
-                                                    setShowAssignModal(true);
-                                                }}
-                                                className="px-3 py-1.5 border border-blue-600 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50 transition"
-                                            >
-                                                Assign
-                                            </button>
-                                        )}
-                                        {client.ambassador_id === amb.id && (
-                                            <span className="text-sm text-green-600 font-medium flex items-center gap-1">
-                                                <Check size={16} /> Assigned
+        {/* LOGS */}
+        {activeTab === 'logs' && (
+            <div className="bg-white rounded-xl border shadow-sm overflow-hidden animate-in fade-in">
+                <div className="p-6 border-b bg-gray-50">
+                    <h3 className="font-bold text-gray-900">Audit Logs</h3>
+                    <p className="text-sm text-gray-500">History of changes and activities for this client.</p>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-gray-50 text-gray-500 font-medium border-b">
+                            <tr>
+                                <th className="px-6 py-3">Date</th>
+                                <th className="px-6 py-3">Actor</th>
+                                <th className="px-6 py-3">Action</th>
+                                <th className="px-6 py-3">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {auditLogs.length === 0 ? (
+                                <tr>
+                                    <td colSpan={4} className="px-6 py-8 text-center text-gray-400 italic">No logs found.</td>
+                                </tr>
+                            ) : (
+                                auditLogs.map((log) => (
+                                    <tr key={log.id} className="hover:bg-gray-50 transition">
+                                        <td className="px-6 py-3 text-gray-500 whitespace-nowrap">
+                                            {new Date(log.created_at).toLocaleString()}
+                                        </td>
+                                        <td className="px-6 py-3 font-medium text-gray-900">
+                                            {log.actor_user_id === 'system' ? 'System' : 'User'}
+                                        </td>
+                                        <td className="px-6 py-3">
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                                                {log.action}
                                             </span>
-                                        )}
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
+                                        </td>
+                                        <td className="px-6 py-3 text-gray-500 max-w-xs truncate">
+                                            {log.before_json && log.after_json ? (
+                                                <span title={`Before: ${log.before_json}\nAfter: ${log.after_json}`}>Change detected</span>
+                                            ) : (
+                                                <span className="opacity-50">-</span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         )}
 
-        {/* ASSIGN MODAL */}
         {showAssignModal && selectedAmbassador && (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">Confirm Assignment</h3>
-                    
-                    <div className="space-y-4 mb-6">
-                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                            <p className="text-sm text-blue-800 mb-1">Client</p>
-                            <p className="font-bold text-blue-900">{client.name}</p>
-                        </div>
-                        <div className="flex justify-center">
-                            <ArrowLeft className="rotate-[-90deg] text-gray-400" />
-                        </div>
-                        <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-                            <p className="text-sm text-green-800 mb-1">New Ambassador</p>
-                            <p className="font-bold text-green-900">{selectedAmbassador.name}</p>
-                            <p className="text-xs text-green-700">{selectedAmbassador.email}</p>
-                        </div>
-                        
-                        {client.ambassador_id && (
-                            <div className="flex items-start gap-2 text-yellow-700 bg-yellow-50 p-3 rounded-lg text-sm">
-                                <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
-                                <p>This will reassign the client from their current ambassador. This action is logged.</p>
-                            </div>
-                        )}
-                    </div>
-
+                <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+                    <h3 className="text-lg font-bold mb-4">Confirm Assignment</h3>
+                    <p className="mb-4">Assign <b>{selectedAmbassador.name}</b> to {client.name}?</p>
                     <div className="flex justify-end gap-3">
-                        <button 
-                            onClick={() => setShowAssignModal(false)}
-                            className="px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition"
-                        >
-                            Cancel
-                        </button>
-                        <button 
-                            onClick={handleAssign}
-                            disabled={loading}
-                            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition disabled:opacity-50 flex items-center gap-2"
-                        >
-                            {loading ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
-                            Confirm Assignment
-                        </button>
+                        <button onClick={() => setShowAssignModal(false)} className="px-4 py-2 text-gray-600">Cancel</button>
+                        <button onClick={handleAssign} className="px-4 py-2 bg-blue-600 text-white rounded">Confirm</button>
                     </div>
                 </div>
-            </div>
-        )}
-
-        {/* Placeholder for other tabs */}
-        {(activeTab === 'contract') && (
-            <div className="p-12 text-center bg-gray-50 rounded-xl border border-dashed">
-                <Settings className="mx-auto text-gray-400 mb-2" size={32} />
-                <h3 className="font-medium text-gray-900">Work in Progress</h3>
-                <p className="text-sm text-gray-500">This section is being implemented.</p>
             </div>
         )}
 

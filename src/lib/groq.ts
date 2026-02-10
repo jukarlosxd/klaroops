@@ -13,7 +13,7 @@ export const groq = new Groq({
 
 export const GROQ_MODELS = {
   FAST: 'llama-3.1-8b-instant',
-  POWERFUL: 'llama-3.1-70b-versatile',
+  POWERFUL: 'llama-3.3-70b-versatile',
   MIXTRAL: 'mixtral-8x7b-32768'
 };
 

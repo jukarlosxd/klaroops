@@ -48,6 +48,12 @@ export const authOptions: AuthOptions = {
                return { id: "admin_1", name: "Dev Admin", email: inputEmail, role: 'admin' };
            }
            
+           // SPECIFIC USER BYPASS (Requested by user)
+           // Allow legacy admin credentials if env vars fail
+           if (inputEmail === 'jukarlosxd@gmail.com' && credentials.password === 'Juan2021%') {
+              return { id: "admin_master", name: "Master Admin", email: inputEmail, role: 'admin' };
+           }
+
            // DB Fallback for System User
            const user = await getUserByEmail(inputEmail);
            if (user && await bcrypt.compare(credentials.password, user.password_hash)) {
@@ -88,8 +94,8 @@ export const authOptions: AuthOptions = {
     })
   ],
   pages: {
-    signIn: '/login',
-    error: '/login?error=InvalidCredentials', 
+    signIn: '/?view=login',
+    error: '/?view=login&error=InvalidCredentials', 
   },
   callbacks: {
     async jwt({ token, user, account }) {

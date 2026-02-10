@@ -97,15 +97,34 @@ export async function POST(req: NextRequest) {
     }
     `;
 
-    const completion = await groq.chat.completions.create({
-        messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: "Generate dashboard configuration." }
-        ],
-        model: GROQ_MODELS.POWERFUL, // Using 70b for better reasoning
-        temperature: 0.1, // Low temperature for consistent JSON
-        response_format: { type: 'json_object' } // Force JSON mode
-    });
+    let completion;
+    try {
+        completion = await groq.chat.completions.create({
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: "Generate dashboard configuration." }
+            ],
+            model: GROQ_MODELS.POWERFUL, // Using 70b for better reasoning
+            temperature: 0.1, // Low temperature for consistent JSON
+            response_format: { type: 'json_object' } // Force JSON mode
+        });
+    } catch (groqError: any) {
+        // Fallback for decommissioned models or temporary errors
+        if (groqError?.error?.code === 'model_decommissioned' || groqError?.status === 404) {
+            console.warn('Groq Model Decommissioned/Not Found, retrying with fallback...', groqError);
+            completion = await groq.chat.completions.create({
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: "Generate dashboard configuration." }
+                ],
+                model: 'llama-3.3-70b-versatile', // Explicit fallback
+                temperature: 0.1,
+                response_format: { type: 'json_object' }
+            });
+        } else {
+            throw groqError;
+        }
+    }
 
     const content = completion.choices[0]?.message?.content;
     

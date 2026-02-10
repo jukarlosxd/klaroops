@@ -1,4 +1,5 @@
 import { getAmbassadorById, getClientsByAmbassador, getCommissions, getAppointments, getAuditLogs, getClients } from '@/lib/admin-db';
+import { supabaseAdmin } from '@/lib/supabase'; // Use Admin Client for system data
 import AmbassadorDetailClient from './client';
 import { notFound } from 'next/navigation';
 
@@ -31,6 +32,29 @@ export default async function AmbassadorDetailPage(props: { params: Promise<{ id
       (l.entity_type === 'commission' && commissions.some(c => c.id === l.entity_id))
     ) : [];
 
+    // --- NEW DATA FETCHING (Supabase) ---
+    // 1. Prospects (Leads) - Read Only
+    const { data: prospects } = await supabaseAdmin
+        .from('ambassador_leads')
+        .select('*')
+        .eq('ambassador_id', ambassador.id)
+        .order('created_at', { ascending: false });
+
+    // 2. AI Stats - Read Only (Count messages)
+    const { count: aiInteractionCount } = await supabaseAdmin
+        .from('ambassador_ai_messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('ambassador_id', ambassador.id)
+        .eq('role', 'user'); // Count user questions
+
+    const { data: lastAiMessage } = await supabaseAdmin
+        .from('ambassador_ai_messages')
+        .select('created_at')
+        .eq('ambassador_id', ambassador.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
     return (
       <AmbassadorDetailClient 
         ambassador={ambassador}
@@ -39,6 +63,11 @@ export default async function AmbassadorDetailPage(props: { params: Promise<{ id
         appointments={appointments}
         auditLogs={relevantLogs}
         allClients={allClientsList}
+        prospects={prospects || []} // Pass prospects
+        aiStats={{
+            count: aiInteractionCount || 0,
+            lastActive: lastAiMessage?.created_at || null
+        }}
       />
     );
   } catch (error) {

@@ -3,8 +3,10 @@ import {
   getAmbassadors, 
   getDashboardProject, 
   getAIThreads, 
-  getAuditLogs 
+  getAuditLogs,
+  getClientAIProfile
 } from '@/lib/admin-db';
+import { getGoogleIntegrationStatus } from '@/lib/google-auth';
 import ClientDetailClient from './client';
 import { notFound } from 'next/navigation';
 
@@ -22,6 +24,8 @@ export default async function ClientDetailPage(props: { params: Promise<{ id: st
     const ambassadors = (await getAmbassadors()) || [];
     const dashboardProject = await getDashboardProject(client.id);
     const aiThreads = (await getAIThreads(client.id)) || [];
+    const aiProfile = await getClientAIProfile(client.id);
+    const googleStatus = await getGoogleIntegrationStatus();
     
     // Filter logs for this client
     const allLogs = (await getAuditLogs()) || [];
@@ -36,7 +40,9 @@ export default async function ClientDetailPage(props: { params: Promise<{ id: st
         ambassadors={ambassadors}
         initialDashboardProject={dashboardProject}
         initialAIThreads={aiThreads}
+        initialAIProfile={aiProfile}
         auditLogs={relevantLogs}
+        serviceAccountEmail={googleStatus?.email}
       />
     );
   } catch (error) {

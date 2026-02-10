@@ -100,15 +100,33 @@ export async function POST(req: NextRequest) {
     - Do not make up numbers.
     `;
 
-    const completion = await groq.chat.completions.create({
-        messages: [
-            { role: 'system', content: systemPrompt },
-            ...historyMessages
-        ],
-        model: GROQ_MODELS.FAST,
-        temperature: 0.5,
-        max_tokens: 500,
-    });
+    let completion;
+    try {
+        completion = await groq.chat.completions.create({
+            messages: [
+                { role: 'system', content: systemPrompt },
+                ...historyMessages
+            ],
+            model: GROQ_MODELS.FAST,
+            temperature: 0.5,
+            max_tokens: 500,
+        });
+    } catch (groqError: any) {
+        if (groqError?.error?.code === 'model_decommissioned' || groqError?.status === 404) {
+             console.warn('Groq Model Decommissioned/Not Found, retrying with fallback...', groqError);
+             completion = await groq.chat.completions.create({
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    ...historyMessages
+                ],
+                model: 'llama-3.1-8b-instant', // Explicit fallback
+                temperature: 0.5,
+                max_tokens: 500,
+            });
+        } else {
+            throw groqError;
+        }
+    }
 
     const aiResponse = completion.choices[0]?.message?.content || "I couldn't generate a response.";
 

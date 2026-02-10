@@ -2,13 +2,12 @@
 
 import React, { useState } from 'react';
 import { Database, Save, Download, Globe, CheckCircle, AlertTriangle } from 'lucide-react';
-// import { seedData } from '@/lib/admin-db'; // Removed direct import to avoid server/client conflict
 
-export default function SettingsClient({ googleConfig }: { googleConfig: any }) {
+export default function SettingsClient({ googleConfig, googleStatus }: { googleConfig: any, googleStatus: any }) {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
 
-  const isGoogleConnected = googleConfig?.access_token && googleConfig?.refresh_token;
+  const isGoogleConnected = !!googleStatus?.email;
 
   const handleSeed = async () => {
     if (!confirm('This will reset/overwrite data. Continue?')) return;
@@ -23,8 +22,15 @@ export default function SettingsClient({ googleConfig }: { googleConfig: any }) 
     setLoading(false);
   };
 
-  const handleConnectGoogle = () => {
-    window.location.href = '/api/auth/google/start';
+  const handleConnectGoogle = async () => {
+    try {
+        const res = await fetch('/api/admin/google/auth-url');
+        if (!res.ok) throw new Error('Failed to get auth URL');
+        const { url } = await res.json();
+        window.location.href = url;
+    } catch (e) {
+        alert('Error initiating Google connection');
+    }
   };
 
   return (
@@ -35,23 +41,23 @@ export default function SettingsClient({ googleConfig }: { googleConfig: any }) 
       <div className="bg-white p-6 rounded-xl border shadow-sm">
         <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
           <Globe className="text-blue-600" size={20} />
-          Google Integration
+          Google Integration (Central Account)
         </h2>
         <div className="bg-blue-50 p-4 rounded-lg mb-4 text-sm text-blue-800 border border-blue-100">
             <p className="font-bold mb-1">How it works:</p>
-            <p>1. Connect the system admin account (system@klaroops.com).</p>
-            <p>2. Clients share their Google Sheets with <strong>system@klaroops.com</strong> (View Access).</p>
-            <p>3. Klaroops can then read those sheets to build dashboards.</p>
+            <p>1. Connect the system admin account (system@klaroops.com) here.</p>
+            <p>2. Clients share their Google Sheets with <strong>{googleStatus?.email || 'system@klaroops.com'}</strong> (Viewer access).</p>
+            <p>3. Klaroops automatically reads those sheets using this central connection.</p>
         </div>
 
         <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50">
             <div className="flex items-center gap-3">
-                <div className={`w-3 h-3 rounded-full ${isGoogleConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                <div className={`w-3 h-3 rounded-full ${isGoogleConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
                 <div>
                     <p className="font-medium text-gray-900">Google Sheets API</p>
                     <p className="text-xs text-gray-500">
                         {isGoogleConnected 
-                            ? `Connected (Last updated: ${new Date(googleConfig.updated_at).toLocaleDateString()})` 
+                            ? `Connected as ${googleStatus.email}` 
                             : 'Not connected'}
                     </p>
                 </div>
